@@ -4,13 +4,11 @@
 #include <string>
 #include <cstring>
 
-using namespace std;
-
 class Olympian {
 private:
     string name;
-    char state[2];
-    string event;
+    char state[3];
+    std::string event;
     char gender;
     int height;
     int age;
