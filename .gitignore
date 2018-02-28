@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# MacOS Specific Files
+*.DS_Store
+
+# CLion Files (Alexander's IDE)
+cmake-build-debug/
+CMakeLists.txt
+
