@@ -11,7 +11,7 @@ public:
     Olympian(std::string n, std::string e, char g, int h, int a) { name = n; event = e; gender = g; height = h; age = a; }
 
     void setName(std::string n) { name = n; }
-    void setState(char *s) { strcpy(state, s); } //be careful here!
+    void setState(string s) { state = s; }
     void setEvent(std::string e) { event = e; }
     void setGender(char g) { gender = g; }
     void setHeight(int h) { height = h; }
@@ -25,7 +25,7 @@ public:
 
 private:
     std::string name;
-    char state[3];
+    std::string state;
     std::string event;
     char gender;
     int height;
