@@ -34,6 +34,10 @@
 # MacOS Specific Files
 *.DS_Store
 
+#IDEs
+.vs
+DA22C-W18-G5/*
+
 # CLion Files (Alexander's IDE)
 cmake-build-debug/
 CMakeLists.txt
