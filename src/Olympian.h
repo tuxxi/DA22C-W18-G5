@@ -7,30 +7,50 @@
 class Olympian 
 {
 public:
-    Olympian() { name = "", event = "", gender = '\0', height = 0; age = 0; }
-    Olympian(std::string n, std::string e, char g, int h, int a) { name = n; event = e; gender = g; height = h; age = a; }
+    Olympian() { name = "", sport = "", gender = '\0', height = 0; age = 0; }
+    Olympian(std::string n, std::string sp, std::string st, char g, int a, int h, int ng, int ns, int nb)
+    {
+        name = n;
+        sport = sp;
+        state = st;
+        gender = g;
+        age = a;
+        height = h;
+        nGold = ng;
+        nSilver = ns;
+        nBronze = nb;
+    }
 
     void setName(std::string n) { name = n; }
-    void setState(string s) { state = s; }
-    void setEvent(std::string e) { event = e; }
+    void setSport(std::string s) { sport = s; }
+    void setState(std::string s) { state = s; }
     void setGender(char g) { gender = g; }
     void setHeight(int h) { height = h; }
     void setAge(int a) { age = a; }
+    void setnGold(int g) { nGold = g; }
+    void setnSilver(int s) { nSilver = s; }
+    void setnBronze(int b) { nBronze = b; }
 
     std::string getName() const { return name; }
-    std::string getEvent() const { return event; }
+    std::string getSport() const { return sport; }
+    std::string getState() const { return state; }
     char setGender() const { return gender; }
-    int getHeight() const { return height; }
     int getAge() const { return age; }
+    int getHeight() const { return height; }
+    int getnGold() const { return nGold; }
+    int getnSilver() const { return nSilver; }
+    int getnBronze() const { return nBronze; }
 
 private:
     std::string name;
     std::string state;
-    std::string event;
+    std::string sport;
     char gender;
     int height;
     int age;
-
+    int nGold;
+    int nSilver;
+    int nBronze;
 };
 
-#endif //
+#endif
