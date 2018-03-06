@@ -1,9 +1,9 @@
-#include <Olympian.h>
-#include <HashTable.h>
-// #include <BinarySearchTree.h>
-
 #ifndef TEAM_PROJECT_OLYMPIANDATABASE_H
 #define TEAM_PROJECT_OLYMPIANDATABASE_H
+
+#include "Olympian.h"
+#include "HashTable.h"
+#include "BinarySearchTree.h"
 
 class OlympianDatabase {
 private:
@@ -19,7 +19,7 @@ private:
 
     void buildFromFile(std::string);
     const Olympian *readRecord(FILE*);
-    bool insert(const Olympian*);
+    bool _insert(const Olympian*);
 public:
     OlympianDatabase(int, int, std::string);
 

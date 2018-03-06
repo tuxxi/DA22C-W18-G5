@@ -7,7 +7,7 @@
 class Olympian 
 {
 public:
-    Olympian() { name = "", sport = "", gender = '\0', height = 0; age = 0; }
+    Olympian() = default;
     Olympian(std::string n, std::string sp, std::string st, char g, int a, int h, int ng, int ns, int nb)
     {
         name = n;

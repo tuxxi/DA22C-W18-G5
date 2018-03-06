@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstring>
 #include "OlympianDatabase.h"
+#include "Olympian.h"
 
 #define FILE_READ_ERROR(s) cout << "Error reading the input file " << s << ". Exiting\n", exit(1);
 #define LINE_SIZE 300
@@ -15,6 +16,8 @@ OlympianDatabase::OlympianDatabase(int hashTableSize, int bucketSize, string inf
 
 void OlympianDatabase::buildFromFile(string infileName)
 {
+    /* I commented this out bc it doesn't compile on my machine
+     * pls fix
     Olympian *newRecord;
     FILE *infile;
 
@@ -25,12 +28,17 @@ void OlympianDatabase::buildFromFile(string infileName)
 
     while ((newRecord = readRecord()))
         insert(newRecord);
+        */
 }
 
 const Olympian * OlympianDatabase::readRecord(FILE *infile)
 {
+    //this function gives me lots of warnings with -Wall -Wextra -Wpedantic
+    //in addition to clang-tidy problems
+    //perhaps we should rewrite?
+
     char input[LINE_SIZE], *firstName, *lastName, *fullName, *state, *sport, *medals,
-            *bronze, *silver, *gold, *strPtr, *endPtr;
+            *bronze, *silver, *gold, *strPtr, *endPtr, gender;
     int age, height, nGold, nSilver, nBronze;
     Olympian *newRecord = nullptr;
 
@@ -83,7 +91,7 @@ bool OlympianDatabase::insert(const Olympian *)
     ;
 }
 
-OlympianDatabase::~OlympianDatabase(int, int, string)
+OlympianDatabase::~OlympianDatabase()
 {
     delete hashTable;
     delete bstAge;
