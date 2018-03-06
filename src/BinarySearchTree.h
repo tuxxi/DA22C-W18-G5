@@ -24,7 +24,6 @@ public:
     template<class C>
     friend std::ostream& operator<<(std::ostream& stream, const BinarySearchTree<C>& other);
 
-
     bool empty() const { return count == 0; }
     int size() const { return count; }
     void clear() { destroyTree(rootPtr); rootPtr = nullptr; count = 0; }
@@ -45,21 +44,20 @@ public:
     T& findLargest() const;
 
 private:
-    template<class S>
     struct BinaryNode
     {
-        S item;                 // Data portion
+        T item;                 // Data portion
         BinaryNode* leftPtr;	// Pointer to left child
-        BinaryNode* rightPtr;// Pointer to right child
+        BinaryNode* rightPtr;   // Pointer to right child
 
-        explicit BinaryNode(const S& anItem)
+        explicit BinaryNode(const T& anItem)
             : item(anItem), leftPtr(nullptr), rightPtr(nullptr) {}
-        BinaryNode(const S& anItem, BinaryNode* left, BinaryNode* right)
+        BinaryNode(const T& anItem, BinaryNode* left, BinaryNode* right)
             : item(anItem), leftPtr(left), rightPtr(right) {}
 
         bool isLeaf() const {return (leftPtr == nullptr && rightPtr == nullptr);}
     };
-    typedef BinaryNode<T> node;
+    typedef BinarySearchTree<T>::BinaryNode node;
     unsigned int count;
     node* rootPtr;
 
@@ -132,23 +130,18 @@ bool BinarySearchTree<T>::insert(const T & newEntry)
 template<class T>
 bool BinarySearchTree<T>::remove(const T& target)
 {
-    bool isSuccessful = false;
-    this->rootPtr = _remove(this->rootPtr, target, isSuccessful);
-    return isSuccessful;
+    bool success = false;
+    this->rootPtr = _remove(this->rootPtr, target, success);
+    return success;
 }
 
-//searches for an entry and assigns the returnedItem reference to the item if found
-//returns true when the item was found, false if not
+//searches for an entry in the BST
+//returns a pointer to the item, indicating that the search may be unsuccessful
+//in which case, returns a null pointer
 template<class T>
 T* BinarySearchTree<T>::getEntry(const T& anEntry) const
 {
-    auto* ptr = this->rootPtr;
-    ptr = _find(ptr, anEntry);
-    if (ptr && ptr->item == anEntry)
-    {
-        return ptr->item;
-    }
-    return nullptr;
+    return &(_find(this->rootPtr, anEntry)->item);
 }
 //traverses the tree to find the smallest node in avg O(log n) time
 template<class T>
@@ -182,7 +175,6 @@ BinarySearchTree<T>& BinarySearchTree<T>::operator=(const BinarySearchTree<T>& s
 /************************************************************************/
 //////////////////////////// private (internal) functions ///////////////////////////
 /************************************************************************/
-
 //safely removes a node from the tree
 template<class T>
 typename BinarySearchTree<T>::node* BinarySearchTree<T>::deleteNode(node *nodePtr)
@@ -213,8 +205,7 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::deleteNode(node *nodePt
 
 //in the special case that we are a node with two children, we need to remove the leftmost node first
 template<class T>
-typename BinarySearchTree<T>::node* BinarySearchTree<T>::removeLeftmost(node *nodePtr,
-                                                                        T &successor)
+typename BinarySearchTree<T>::node* BinarySearchTree<T>::removeLeftmost(node *nodePtr, T& successor)
 {
     if (nodePtr->leftPtr == nullptr)
     {
@@ -255,7 +246,7 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_insert(node* pParent, 
     {
         return pNewChild;
     }
-    if (pParent->item> pNewChild->item)
+    if (pParent->item > pNewChild->item)
     {
         pParent->leftPtr = _insert(pParent->leftPtr, pNewChild);
     }
@@ -299,7 +290,7 @@ template<class T>
 typename BinarySearchTree<T>::node* BinarySearchTree<T>::_find(node *nodePtr, const T& target) const
 {
     //base case: null check before we try to access items
-    if (nodePtr == nullptr)
+    if (!nodePtr)
     {
         return nullptr;
     }
@@ -323,7 +314,7 @@ T& BinarySearchTree<T>::_largest(node *nodePtr) const
 {
     //the largest node is at the end of the right side
     //traverse right until the right child node is null, in which case we've reached the end
-    if (nodePtr->rightPtr == nullptr)
+    if (!nodePtr->rightPtr)
     {
         return nodePtr->item;
     }
@@ -336,7 +327,7 @@ T& BinarySearchTree<T>::_smallest(node *nodePtr) const
 {
     //the smallest node is at the end of the left side
     //traverse right until the right child node is null, in which case we've reached the end
-    if (nodePtr->leftPtr == nullptr)
+    if (!nodePtr->leftPtr)
     {
         return nodePtr->item;
     }
