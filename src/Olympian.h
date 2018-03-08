@@ -1,8 +1,8 @@
 #ifndef OLYMPIAN_H
 #define OLYMPIAN_H
 
+#include <iostream>
 #include <string>
-#include <cstring>
 
 class Olympian 
 {
@@ -41,6 +41,8 @@ public:
     int getnSilver() const { return nSilver; }
     int getnBronze() const { return nBronze; }
 
+    friend std::ostream &operator<<(std::ostream&, const Olympian&);
+
 private:
     std::string name;
     std::string state;
@@ -52,5 +54,19 @@ private:
     int nSilver;
     int nBronze;
 };
+
+std::ostream &operator<<(std::ostream &os, const Olympian &olympian)
+{
+    os << "Name: " << olympian.name << std::endl;
+    os << "Age: " << olympian.age << std::endl;
+    os << "Gender: " << olympian.gender << std::endl;
+    os << "State: " << olympian.state << std::endl;
+    os << "Sport: " << olympian.sport << std::endl;
+    os << "Number Gold Medals: " << olympian.nGold << std::endl;
+    os << "Number Silver Medals: " << olympian.nSilver << std::endl;
+    os << "Number Bronze Medals: " << olympian.nBronze << std::endl;
+
+   return os;
+}
 
 #endif

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <cstring>
+#include <string>
 #include "OlympianDatabase.h"
 #include "Olympian.h"
 
@@ -11,84 +11,146 @@ using namespace std;
 
 OlympianDatabase::OlympianDatabase(int hashTableSize, int bucketSize, string infileName)
 {
-    ;
+    nRecords = 0;
+    hashTable = new HashTable<Olympian, key>(hashTableSize, bucketSize);
+    bstAge = new BinarySearchTree<Olympian>;
+    bstHeight = new BinarySearchTree<Olympian>;
 }
 
 void OlympianDatabase::buildFromFile(string infileName)
 {
-    /* I commented this out bc it doesn't compile on my machine
-     * pls fix
     Olympian *newRecord;
-    FILE *infile;
+    ifstream infile;
 
-    if (!(infile = fopen(infileName)))
+    if (!infile.open(infileName))
         FILE_READ_ERROR(infileName)
 
     fgets(input, LINE_SIZE, infile);
 
     while ((newRecord = readRecord()))
-        insert(newRecord);
-        */
+        _insert(newRecord);
 }
 
-const Olympian * OlympianDatabase::readRecord(FILE *infile)
+const Olympian *OlympianDatabase::readRecord(ifstream &infile)
 {
-    //this function gives me lots of warnings with -Wall -Wextra -Wpedantic
-    //in addition to clang-tidy problems
-    //perhaps we should rewrite?
+    string input, firstName, lastName, sport, gender, infileName = "winter-olympians.csv";
+    int nGold, nSilver, nBronze, age, height;
 
-    char input[LINE_SIZE], *firstName, *lastName, *fullName, *state, *sport, *medals,
-            *bronze, *silver, *gold, *strPtr, *endPtr, gender;
-    int age, height, nGold, nSilver, nBronze;
-    Olympian *newRecord = nullptr;
+    while(getline(infile, firstName, ','))
+    {
+        if (firstName.length())
+        {
+            getline(infile, lastName, ',');
+            getline(infile, gender, ',');
+            getline(infile, sport, ',');
+            getline(infile, input, ',');
 
-    fgets(input, LINE_SIZE, infile);
+            if (input.find('"') != string::npos)
+            {
+                getline(infile, input, '"');
+                getline(infile, input, ',');
+                getline(infile, input, ',');
+            }
+            else
+                (getline(infile, input, ','));
 
-    firstName = strtok(input, ",");
+            if (input.find('"') != string::npos)
+            {
+                getline(infile, input, '"');
+                getline(infile, input, ',');
+            }
 
-    if (firstName) {
-        lastName = strtok(NULL, ",");
-        gender = *strtok(NULL, ",");
-        sport = strPtr = strtok(NULL, ",");
-        strPtr += strlen(sport) + 1;
+            getline(infile, input, ',');
+            if (isdigit(input[0]))
+                nGold = stoi(input);
+            else
+                nGold = 0;
+            getline(infile, input, ',');
+            if (isdigit(input[0]))
+                nSilver = stoi(input);
+            else
+                nSilver = 0;
+            getline(infile, input, ',');
+            if (isdigit(input[0]))
+                nBronze = stoi(input);
+            else
+                nBronze = 0;
 
+            getline(infile, input, '"');
+            getline(infile, input, '\'');
+            height = 12 * stoi(input);
+            getline(infile, input, '"');
+            height += stoi(input);
 
-        if (*strPtr == '\"')
-            strPtr = strchr(strPtr + 1, '\"') + 2;
-        else
-            strPtr = strchr(strPtr, ',') + 1;
-        if (*strPtr == '\"')
-            strPtr = strchr(strPtr + 1, '\"') + 2;
-        else if (isdigit(*strPtr))
-            strPtr = strchr(strPtr, ',') + 1;
-        else
-            strPtr = strchr(strPtr + 1, ',');
+            for (int i = 0; i < 5; i++)
+                getline(infile, input, ',');
+            age = stoi(input);
 
-        nGold = strtol(strPtr, &endPtr, 10);
-        nSilver = strtol(endPtr + 1, &endPtr, 10);
-        nBronze = strtol(endPtr + 1, &endPtr, 10);
-        strPtr = endPtr + 2;
-
-        height = 12 * strtol(strPtr, &endPtr, 10) + strtol(endPtr + 1, &endPtr, 10);
-        strPtr = endPtr + 4;
-
-        for (int i = 0; i < 3; i++)
-            strPtr = strchr(strPtr, ',') + 1;
-        age = strtol(strPtr, &endPtr, 10);
-
-        strPtr = strchr(endPtr + 1, ',') + 1;
-        state = strtok(strPtr, ",");
-
-        newRecord = new Olympian(strcat(lastName, strcat(", ", firstName)), sport, state, gender,
-                                 age, height, nGold, nSilver, nBronze);
+            cout << lastName + ", " << firstName << "; " << sport << "; "  << nGold << ", " << nSilver << ", " << nBronze << endl;
+        }
+        getline(infile, input, '\n');
     }
 
-    return newRecord;
 }
 
-bool OlympianDatabase::insert(const Olympian *)
+/*const Olympian *OlympianDatabase::searchByName(std::string key)
 {
-    ;
+    Olympian *foundRecord;
+
+    if ((foundRecord = hashTable->findEntry(key)))
+        cout << *foundRecord;
+    else
+        cout << key << " was not found in the database." << endl;
+}
+
+const Olympian *OlympianDatabase::searchByAge(int age)
+{
+    Olympian foundRecord;
+
+    foundRecord.setAge(age);
+
+    //if ((foundRecord = bstAge->getEntry()))
+}
+
+const Olympian *OlympianDatabase::searchByHeight(int height)
+{
+
+}
+
+bool OlympianDatabase::_insert(const Olympian *newRecord)
+{
+    return (hashTable->insert(newRecord->getName(), newRecord) && bstHeight->insert(newRecord)
+            && bstAge->insert(newRecord));
+}*/
+
+int cmpName(const Olympian *olympian1, const Olympian *olympian2)
+{
+    if (olympian1->getName() < olympian2->getName())
+        return 1;
+    else if (olympian1->getName() > olympian2->getName())
+        return -1;
+
+    return 0;
+}
+
+int cmpAge(const Olympian *olympian1, const Olympian *olympian2)
+{
+    if (olympian1->getAge() < olympian2->getAge())
+        return 1;
+    else if (olympian2->getAge() > olympian2->getAge())
+        return -1;
+
+    return 0;
+}
+
+int cmpHeight(const Olympian *olympian1, const Olympian *olympian2)
+{
+    if (olympian->getHeight() < olympian2->getHeight())
+        return 1;
+    else if (olympian1->getHeight() > olympian2->getHeight())
+        return -1;
+
+    return 0;
 }
 
 OlympianDatabase::~OlympianDatabase()
