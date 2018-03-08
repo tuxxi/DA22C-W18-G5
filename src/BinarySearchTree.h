@@ -7,12 +7,19 @@
 
 #include <iostream>
 
+enum class COMPARE_FN
+{
+    LESS_THAN = -1,
+    EQUAL_TO = 0,
+    GREATER_THAN = 1
+};
+
 template<class T>
 class BinarySearchTree
 {
 public:
     // "admin" functions
-    BinarySearchTree();
+    explicit BinarySearchTree(COMPARE_FN (*fn)(const T&, const T&));
     virtual ~BinarySearchTree();
 
     //copy constructor
@@ -58,6 +65,8 @@ private:
         bool isLeaf() const {return (leftPtr == nullptr && rightPtr == nullptr);}
     };
     typedef BinarySearchTree<T>::BinaryNode node;
+
+    COMPARE_FN (*compare)(const T&, const T&); //function pointer to a compare function for T
     unsigned int count;
     node* rootPtr;
 
@@ -97,8 +106,8 @@ private:
 
 //default ctor
 template <class T>
-BinarySearchTree<T>::BinarySearchTree()
-    : rootPtr(nullptr), count(0)
+BinarySearchTree<T>::BinarySearchTree(COMPARE_FN (*fn)(const T&, const T&))
+    : rootPtr(nullptr), count(0), compare(fn)
 {}
 
 //copy assignment ctor
@@ -106,6 +115,7 @@ template <class T>
 BinarySearchTree<T>::BinarySearchTree(const BinarySearchTree<T>& tree)
     : rootPtr(nullptr), count(0)
 {
+    compare = tree.compare;
     copyTree(tree.rootPtr);
 }
 
@@ -141,7 +151,11 @@ bool BinarySearchTree<T>::remove(const T& target)
 template<class T>
 T* BinarySearchTree<T>::getEntry(const T& anEntry) const
 {
-    return &(_find(this->rootPtr, anEntry)->item);
+    if (auto node = _find(this->rootPtr, anEntry))
+    {
+        return &node->item;
+    }
+    return nullptr;
 }
 //traverses the tree to find the smallest node in avg O(log n) time
 template<class T>
@@ -168,6 +182,7 @@ std::ostream &operator<<(std::ostream &stream, const BinarySearchTree<T> &other)
 template<class T>
 BinarySearchTree<T>& BinarySearchTree<T>::operator=(const BinarySearchTree<T>& sourceTree)
 {
+    compare = sourceTree.compare;
     copyTree(sourceTree.rootPtr);
     return *this;
 }
@@ -246,11 +261,11 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_insert(node* pParent, 
     {
         return pNewChild;
     }
-    if (pParent->item > pNewChild->item)
+    if (compare(pParent->item, pNewChild->item) == COMPARE_FN::GREATER_THAN)
     {
         pParent->leftPtr = _insert(pParent->leftPtr, pNewChild);
     }
-    if (pParent->item < pNewChild->item)
+    if (compare(pParent->item, pNewChild->item) == COMPARE_FN::LESS_THAN)
     {
         pParent->rightPtr = _insert(pParent->rightPtr, pNewChild);
     }
@@ -268,11 +283,11 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_remove(node* nodePtr, 
         success = false;
         return nullptr;
     }
-    if (nodePtr->item > target)
+    if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
     {
         nodePtr->leftPtr = _remove(nodePtr->leftPtr, target, success);
     }
-    else if (nodePtr->item < target)
+    else if (compare(nodePtr->item, target) == COMPARE_FN::LESS_THAN)
     {
         nodePtr->rightPtr = _remove(nodePtr->rightPtr, target, success);
     }
@@ -294,11 +309,11 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_find(node *nodePtr, co
     {
         return nullptr;
     }
-    if (nodePtr->item > target)
+    if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
     {
         _find(nodePtr->leftPtr, target);
     }
-    else if (nodePtr->item < target)
+    else if (compare(nodePtr->item, target) == COMPARE_FN::LESS_THAN)
     {
         _find(nodePtr->rightPtr, target);
     }
