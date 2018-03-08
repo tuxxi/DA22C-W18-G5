@@ -1,8 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <string>
 #include "OlympianDatabase.h"
-#include "Olympian.h"
 
 #define FILE_READ_ERROR(s) cout << "Error reading the input file " << s << ". Exiting\n", exit(1);
 #define LINE_SIZE 300
@@ -13,21 +11,22 @@ OlympianDatabase::OlympianDatabase(int hashTableSize, int bucketSize, string inf
 {
     nRecords = 0;
     hashTable = new HashTable<Olympian, key>(hashTableSize, bucketSize);
-    bstAge = new BinarySearchTree<Olympian>;
-    bstHeight = new BinarySearchTree<Olympian>;
+    bstAge = new BinarySearchTree<Olympian>(cmpAge);
+    bstHeight = new BinarySearchTree<Olympian>(cmpHeight);
 }
 
 void OlympianDatabase::buildFromFile(string infileName)
 {
-    Olympian *newRecord;
+    ;
     ifstream infile;
+    infile.open(infileName); //open returns void ?
 
-    if (!infile.open(infileName))
+    if (!infile)
         FILE_READ_ERROR(infileName)
 
-    fgets(input, LINE_SIZE, infile);
+    //fgets(input, LINE_SIZE, infile);
 
-    while ((newRecord = readRecord()))
+    while (const auto newRecord = readRecord(infile))
         _insert(newRecord);
 }
 
@@ -123,39 +122,27 @@ bool OlympianDatabase::_insert(const Olympian *newRecord)
             && bstAge->insert(newRecord));
 }*/
 
-int cmpName(const Olympian *olympian1, const Olympian *olympian2)
-{
-    if (olympian1->getName() < olympian2->getName())
-        return 1;
-    else if (olympian1->getName() > olympian2->getName())
-        return -1;
-
-    return 0;
-}
-
-int cmpAge(const Olympian *olympian1, const Olympian *olympian2)
-{
-    if (olympian1->getAge() < olympian2->getAge())
-        return 1;
-    else if (olympian2->getAge() > olympian2->getAge())
-        return -1;
-
-    return 0;
-}
-
-int cmpHeight(const Olympian *olympian1, const Olympian *olympian2)
-{
-    if (olympian->getHeight() < olympian2->getHeight())
-        return 1;
-    else if (olympian1->getHeight() > olympian2->getHeight())
-        return -1;
-
-    return 0;
-}
-
 OlympianDatabase::~OlympianDatabase()
 {
     delete hashTable;
     delete bstAge;
     delete bstHeight;
+}
+COMPARE_FN OlympianDatabase::cmpName(const Olympian& a, const Olympian& b)
+{
+    if (a.getName() < a.getName()) return COMPARE_FN::LESS_THAN;
+    else if (a.getName() < a.getName()) return COMPARE_FN::GREATER_THAN;
+    else return COMPARE_FN::EQUAL_TO;
+}
+COMPARE_FN OlympianDatabase::cmpAge(const Olympian &a, const Olympian &b)
+{
+    if (a.getAge() < a.getAge()) return COMPARE_FN::LESS_THAN;
+    else if (a.getAge() < a.getAge()) return COMPARE_FN::GREATER_THAN;
+    else return COMPARE_FN::EQUAL_TO;
+}
+COMPARE_FN OlympianDatabase::cmpHeight(const Olympian &a, const Olympian &b)
+{
+    if (a.getHeight() < a.getHeight()) return COMPARE_FN::LESS_THAN;
+    else if (a.getHeight() < a.getHeight()) return COMPARE_FN::GREATER_THAN;
+    else return COMPARE_FN::EQUAL_TO;
 }
