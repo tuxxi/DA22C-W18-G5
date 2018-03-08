@@ -9,13 +9,13 @@ class OlympianDatabase {
 private:
     void buildFromFile(std::string);
     const Olympian *readRecord(std::ifstream&);
-    bool _insert(Olympian *newRecord);
-    COMPARE_FN cmpName(const Olympian&, const Olympian&);
-    COMPARE_FN cmpAge(const Olympian&, const Olympian&);
-    COMPARE_FN cmpHeight(const Olympian&, const Olympian&);
+    bool _insert(const Olympian *newRecord);
+    static COMPARE_FN cmpName(const Olympian&, const Olympian&);
+    static COMPARE_FN cmpAge(const Olympian&, const Olympian&);
+    static COMPARE_FN cmpHeight(const Olympian&, const Olympian&);
 
     int nRecords;
-    HashTable<Olympian, std::string> *hashTable;
+    HashTable<Olympian /*, std::string*/> *hashTable;
     BinarySearchTree<Olympian> *bstAge;
     BinarySearchTree<Olympian> *bstHeight;
 

@@ -10,7 +10,7 @@ using namespace std;
 OlympianDatabase::OlympianDatabase(int hashTableSize, int bucketSize, string infileName)
 {
     nRecords = 0;
-    hashTable = new HashTable<Olympian, key>(hashTableSize, bucketSize);
+    //hashTable = new HashTable<Olympian, key>(hashTableSize, bucketSize);
     bstAge = new BinarySearchTree<Olympian>(cmpAge);
     bstHeight = new BinarySearchTree<Olympian>(cmpHeight);
 }
@@ -27,7 +27,7 @@ void OlympianDatabase::buildFromFile(string infileName)
     //fgets(input, LINE_SIZE, infile);
 
     while (const auto newRecord = readRecord(infile))
-        _insert(newRecord);
+            _insert(newRecord);
 }
 
 const Olympian *OlympianDatabase::readRecord(ifstream &infile)
@@ -115,12 +115,14 @@ const Olympian *OlympianDatabase::searchByHeight(int height)
 {
 
 }
-
+*/
 bool OlympianDatabase::_insert(const Olympian *newRecord)
 {
-    return (hashTable->insert(newRecord->getName(), newRecord) && bstHeight->insert(newRecord)
-            && bstAge->insert(newRecord));
-}*/
+    /*
+    return (hashTable->insert(newRecord->getName(), *newRecord) && bstHeight->insert(*newRecord)
+            && bstAge->insert(*newRecord));
+    */
+}
 
 OlympianDatabase::~OlympianDatabase()
 {
@@ -131,18 +133,18 @@ OlympianDatabase::~OlympianDatabase()
 COMPARE_FN OlympianDatabase::cmpName(const Olympian& a, const Olympian& b)
 {
     if (a.getName() < a.getName()) return COMPARE_FN::LESS_THAN;
-    else if (a.getName() < a.getName()) return COMPARE_FN::GREATER_THAN;
+    else if (a.getName() > a.getName()) return COMPARE_FN::GREATER_THAN;
     else return COMPARE_FN::EQUAL_TO;
 }
 COMPARE_FN OlympianDatabase::cmpAge(const Olympian &a, const Olympian &b)
 {
     if (a.getAge() < a.getAge()) return COMPARE_FN::LESS_THAN;
-    else if (a.getAge() < a.getAge()) return COMPARE_FN::GREATER_THAN;
+    else if (a.getAge() > a.getAge()) return COMPARE_FN::GREATER_THAN;
     else return COMPARE_FN::EQUAL_TO;
 }
 COMPARE_FN OlympianDatabase::cmpHeight(const Olympian &a, const Olympian &b)
 {
     if (a.getHeight() < a.getHeight()) return COMPARE_FN::LESS_THAN;
-    else if (a.getHeight() < a.getHeight()) return COMPARE_FN::GREATER_THAN;
+    else if (a.getHeight() > a.getHeight()) return COMPARE_FN::GREATER_THAN;
     else return COMPARE_FN::EQUAL_TO;
 }

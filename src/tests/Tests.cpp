@@ -1,3 +1,4 @@
+#ifdef _TESTING
 #include "BSTTest.h"
 
 int main()
@@ -7,3 +8,4 @@ int main()
 #endif
     return 0;
 }
+#endif
