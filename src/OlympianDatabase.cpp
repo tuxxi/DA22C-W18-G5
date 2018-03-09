@@ -3,7 +3,6 @@
 #include "OlympianDatabase.h"
 
 #define FILE_READ_ERROR(s) cout << "Error reading the input file " << s << ". Exiting\n", exit(1);
-#define LINE_SIZE 300
 
 using namespace std;
 
@@ -15,20 +14,17 @@ OlympianDatabase::OlympianDatabase(int hashTableSize, int bucketSize, string inf
     bstHeight = new BinarySearchTree<Olympian>(cmpHeight);
 }
 
-void OlympianDatabase::buildFromFile(string infileName)
+/*void OlympianDatabase::buildFromFile(string infileName)
 {
-    ;
     ifstream infile;
-    infile.open(infileName); //open returns void ?
+    infile.open(infileName);
 
     if (!infile)
         FILE_READ_ERROR(infileName)
 
-    //fgets(input, LINE_SIZE, infile);
-
     while (const auto newRecord = readRecord(infile))
             _insert(newRecord);
-}
+}*/
 
 const Olympian *OlympianDatabase::readRecord(ifstream &infile)
 {
@@ -87,19 +83,30 @@ const Olympian *OlympianDatabase::readRecord(ifstream &infile)
 
             cout << lastName + ", " << firstName << "; " << sport << "; "  << nGold << ", " << nSilver << ", " << nBronze << endl;
         }
-        getline(infile, input, '\n');
+        getline(infile, input);
     }
 
 }
+
+/*bool OlympianDatabase::remove(std::string key)
+{
+    if (_remove(key))
+        return true;
+
+    return false;
+}*/
+
 
 /*const Olympian *OlympianDatabase::searchByName(std::string key)
 {
     Olympian *foundRecord;
 
     if ((foundRecord = hashTable->findEntry(key)))
-        cout << *foundRecord;
-    else
-        cout << key << " was not found in the database." << endl;
+        return foundRecord;
+
+    cout << key << " was not found in the database." << endl;
+
+    return nullptr;
 }
 
 const Olympian *OlympianDatabase::searchByAge(int age)
@@ -116,13 +123,20 @@ const Olympian *OlympianDatabase::searchByHeight(int height)
 
 }
 */
-bool OlympianDatabase::_insert(const Olympian *newRecord)
+/*bool OlympianDatabase::_insert(const Olympian *newRecord)
 {
-    /*
     return (hashTable->insert(newRecord->getName(), *newRecord) && bstHeight->insert(*newRecord)
             && bstAge->insert(*newRecord));
-    */
 }
+
+bool OlympianDatabase::_remove(std::string key)
+{
+    Olympian foundRecord;
+
+    foundRecord.setName(key);
+
+    return (hashTable->remove(key) && bstAge->remove(foundRecord) && bstHeight->remove(foundRecord));
+}*/
 
 OlympianDatabase::~OlympianDatabase()
 {
@@ -132,19 +146,21 @@ OlympianDatabase::~OlympianDatabase()
 }
 COMPARE_FN OlympianDatabase::cmpName(const Olympian& a, const Olympian& b)
 {
-    if (a.getName() < a.getName()) return COMPARE_FN::LESS_THAN;
-    else if (a.getName() > a.getName()) return COMPARE_FN::GREATER_THAN;
-    else return COMPARE_FN::EQUAL_TO;
+    if (a.getName() < b.getName()) return COMPARE_FN::LESS_THAN;
+    else if (a.getName() > b.getName()) return COMPARE_FN::GREATER_THAN;
+    return COMPARE_FN::EQUAL_TO;
 }
 COMPARE_FN OlympianDatabase::cmpAge(const Olympian &a, const Olympian &b)
 {
-    if (a.getAge() < a.getAge()) return COMPARE_FN::LESS_THAN;
-    else if (a.getAge() > a.getAge()) return COMPARE_FN::GREATER_THAN;
-    else return COMPARE_FN::EQUAL_TO;
+    if (a.getName() == b.getName()) return COMPARE_FN::EQUAL_TO;
+    else if (a.getAge() < b.getAge()) return COMPARE_FN::LESS_THAN;
+    else if (a.getAge() > b.getAge()) return COMPARE_FN::GREATER_THAN;
+    return COMPARE_FN::EQUAL_TO;
 }
 COMPARE_FN OlympianDatabase::cmpHeight(const Olympian &a, const Olympian &b)
 {
-    if (a.getHeight() < a.getHeight()) return COMPARE_FN::LESS_THAN;
-    else if (a.getHeight() > a.getHeight()) return COMPARE_FN::GREATER_THAN;
-    else return COMPARE_FN::EQUAL_TO;
+    if (a.getName() == b.getName()) return COMPARE_FN::EQUAL_TO;
+    else if (a.getHeight() < b.getHeight()) return COMPARE_FN::LESS_THAN;
+    else if (a.getHeight() > b.getHeight()) return COMPARE_FN::GREATER_THAN;
+    return COMPARE_FN::EQUAL_TO;
 }
