@@ -7,6 +7,7 @@
 
 #include <iostream>
 
+//compare
 enum class COMPARE_FN
 {
     LESS_THAN = -1,
@@ -33,7 +34,7 @@ public:
 
     bool empty() const { return count == 0; }
     int size() const { return count; }
-    void clear() { destroyTree(rootPtr); rootPtr = nullptr; count = 0; }
+    void clear() { _destroy(rootPtr); rootPtr = nullptr; count = 0; }
 
     void preOrder(void visit(T &)) const {_preorder(visit, rootPtr);}
     void inOrder(void visit(T &)) const  {_inorder(visit, rootPtr);}
@@ -76,7 +77,7 @@ private:
     // remove the leftmost node in the left subtree of nodePtr. Used when the root of the tree is removed
     node* removeLeftmost(node *nodePtr, T &successor);
     // delete all nodes from the tree
-    void destroyTree(node* nodePtr);
+    void _destroy(node *nodePtr);
     // copy from the tree rooted at nodePtr and returns a pointer to the copy
     node* copyTree(const node* nodePtr);
 
@@ -127,6 +128,7 @@ BinarySearchTree<T>::~BinarySearchTree()
 }
 
 //tries to insert a new node into the tree
+//if the item's compare key is a duplicate, the item is inserted in the right subtree
 //returns true when successful
 template<class T>
 bool BinarySearchTree<T>::insert(const T & newEntry)
@@ -243,12 +245,12 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::copyTree(const node* no
 
 //internal recursive destruction function
 template<class T>
-void BinarySearchTree<T>::destroyTree(node* nodePtr)
+void BinarySearchTree<T>::_destroy(node *nodePtr)
 {
     if (nodePtr)
     {
-        destroyTree(nodePtr->leftPtr);
-        destroyTree(nodePtr->rightPtr);
+        _destroy(nodePtr->leftPtr);
+        _destroy(nodePtr->rightPtr);
         --count;
         delete nodePtr;
     }
@@ -265,8 +267,13 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_insert(node* pParent, 
     {
         pParent->leftPtr = _insert(pParent->leftPtr, pNewChild);
     }
-    if (compare(pParent->item, pNewChild->item) == COMPARE_FN::LESS_THAN)
+    else if (compare(pParent->item, pNewChild->item) == COMPARE_FN::LESS_THAN)
     {
+        pParent->rightPtr = _insert(pParent->rightPtr, pNewChild);
+    }
+    else //if (compare(pParent->item, pNewChild->item) == COMPARE_FN::EQUAL_TO)
+    {
+        //put all duplicates in the right subtree
         pParent->rightPtr = _insert(pParent->rightPtr, pNewChild);
     }
     ++this->count;
@@ -298,9 +305,8 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_remove(node* nodePtr, 
     {
         nodePtr->rightPtr = _remove(nodePtr->rightPtr, target, success);
     }
-    else //we didn't find it, we have to keep searching
+    else //we didn't find it, we have to keep searching in the right subtree
     {
-        nodePtr->leftPtr = _remove(nodePtr->leftPtr, target, success);
         nodePtr->rightPtr = _remove(nodePtr->rightPtr, target, success);
     }
     return nodePtr;
@@ -328,10 +334,9 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_find(node *nodePtr, co
     {
         _find(nodePtr->rightPtr, target);
     }
-    else //item is a dupe,
+    else //item is a dupe, search the right subtree for dupes
     {
         _find(nodePtr->rightPtr, target);
-        _find(nodePtr->leftPtr, target);
     }
 }
 
