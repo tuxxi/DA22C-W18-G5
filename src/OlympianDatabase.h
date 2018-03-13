@@ -10,6 +10,7 @@ private:
     void buildFromFile(std::string);
     const Olympian *readRecord(std::ifstream&);
     bool _insert(const Olympian *newRecord);
+    bool _remove(std::string);
     static COMPARE_FN cmpName(const Olympian&, const Olympian&);
     static COMPARE_FN cmpAge(const Olympian&, const Olympian&);
     static COMPARE_FN cmpHeight(const Olympian&, const Olympian&);
