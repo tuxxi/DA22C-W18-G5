@@ -16,7 +16,7 @@ private:
     static COMPARE_FN cmpHeight(const Olympian&, const Olympian&);
 
     int nRecords;
-    HashTable<Olympian /*, std::string*/> *hashTable;
+    HashTable<Olympian, std::string> *hashTable;
     BinarySearchTree<Olympian> *bstAge;
     BinarySearchTree<Olympian> *bstHeight;
 

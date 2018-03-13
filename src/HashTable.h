@@ -1,116 +1,210 @@
-//
 //  HashTable.h
-//  Hasing_table
+//  two templates
 //
-//  Created by YF on 22/02/2018.
+//  Created by YF on 07/03/2018.
 //  Copyright © 2018 YF. All rights reserved.
 //
+#ifndef Hash_h
+#define Hash_h
 
-#ifndef HASHTABLE_H
-#define HASHTABLE_H
+#include <iostream>
+#include <string>
+#include "LinkedList.h"
 
-static const int g_kSIZE = 1000; //todo: remove this?
+const int SIZE = 1000;
+const int size_bucket = 3;
 
-template<class T>
+template<class T, class K>
 class HashTable
 {
-public:
-    HashTable();
-    HashTable(int size); //array size?
-
-    ~HashTable();
-
-    bool insert(int key, const T& data);
-    int getAddress(int key) const;
-    T* findEntry(const int key);
 private:
-    bool _insertion(const int, const int, const T&);
-    int _find(const int address, const int key);
-
     struct Bucket
     {
-        T data;
-        int key = -1;
+        T const *data[size_bucket];
+        bool empty[size_bucket];
     };
+    int (*cmp)(const T*, const K&);
+    long (*hash)(const K&, const int);
+    LinkedList<T, K> *list;
+    Bucket *bucket;
 
-    int (*hash_function)(int);
 
-    Bucket** bucket; //allocate dynamically so we can set size at runtime
-    int size;
-    const int bucket_size = 3;
+    /*
+     the functions below are called by the public functions
+     cannot be accessed by other classes's member functions
+    */
+    bool _insert(const T &, const long address);
+    bool _find(const long address, T &dataOut, const K key);
+    bool _remove(const long address, T &dataOut, const K key);
+public:
+    /*
+     public functions
+     */
+    HashTable( int (*cmp)(const T*, const K&), long (*hash)(const K&, const int));
+    ~HashTable();
+    void insert(const K &key, const T &data);
+    bool findEntry(const K& key, T &dataOut);
+    bool remove(const K&, T &dataOut);
+
 };
 
-template<class T>
-HashTable<T>::HashTable()
-	: HashTable(g_kSIZE) //call HashTable(int)
-{}
+/*
+ dynamical allocation for each pointer in the buckets.
+ set empty to true, which indicates that this spot has not been taken
+ it takes two function pointers, the first one is comparing function (compare the key and the object)
+ the second funciton is the hasing function
+ */
+template<class T,class K>
+HashTable<T, K>::HashTable(int (*cmp)(const T*, const K&), long (*hash)(const K&, const int))
+{
+    this->cmp = cmp;
+    this->hash = hash;
+    list = new LinkedList<T, K>(this->cmp);
 
-template<class T>
-HashTable<T>::HashTable(int size)
-	: size(size)
-{
-	bucket = new Bucket[size][bucket_size];
-}
-
-template<class T>
-HashTable<T>::~HashTable()
-{
-	delete[] bucket;
-}
-template<class T>
-bool HashTable<T>::insert(int key, const T&data)
-{
-    const int address = getAddress(key);
-    return _insertion(address, key, data);
-   // cout<<bucket[300][-1].key<<endl;
-}
-
-template<class T>
-int HashTable<T>::getAddress(int key) const
-{
-    return hash_function(key);
-}
-
-template<class T>
-bool HashTable<T>::_insertion(const int address, const int key, const T& data)
-{
-    for(int i=0; i < bucket_size; ++i)
+    bucket = new Bucket[SIZE];
+    for(int i=0; i<SIZE; i++)
     {
-        if(this->bucket[address][i].key == -1)
+
+        for(int j=0; j<size_bucket; j++)
         {
-            this->bucket[address][i].key = key;
-            this->bucket[address][i].data = data;
+            bucket[i].data[j] = new T;
+            bucket[i].data[j] = nullptr;
+            bucket[i].empty[j] = true;
+        }
+    }
+}
+
+/*
+ the first parameter the the key which can get the index of the bucket
+ */
+
+template<class T,class K>
+void HashTable<T, K>::insert(const K &key, const T &data)
+{
+    long address = hash(key, SIZE);
+
+    if(!_insert(data, address))
+        list->insert(&data);
+
+}
+
+/*takes the key and find the object
+ return true if the item is found
+ */
+template<class T,class K>
+bool HashTable<T, K>::findEntry(const K& key, T &dataOut)
+{
+    long address = hash(key, SIZE);
+
+    if (!_find(address, dataOut, key))
+    {
+        return list->search(key, dataOut);
+    }
+    return true;
+
+}
+
+/*
+ try to remove the object from the hashtable
+ return true if the deletion is successful
+ */
+template<class T,class K>
+bool HashTable<T, K>::remove(const K& key, T &dataOut)
+{
+    long address = hash(key, SIZE);
+
+
+    if (!_remove(address, dataOut, key))
+    {
+        return list->remove(key, dataOut);
+    }
+    return true;
+}
+
+
+/*
+ this is a private function, which is accessed by insert function
+ add a new item in the hashtable if that bucket still has vacant place
+ */
+template<class T,class K>
+bool HashTable<T, K>::_insert(const T &data, const long address)
+{
+
+    for(int i=0; i<size_bucket; i++)
+    {
+        if(bucket[address].empty[i])
+        {
+            bucket[address].empty[i] = false;
+            bucket[address].data[i] = &data;
             return true;
         }
-            
     }
+
     return false;
 }
 
-template<class T>
-T* HashTable<T>::findEntry(const int key)
+/*
+ this is a private function, which is accessed by delete function
+ remove the item if the item is found in the hashtable
+ */
+template<class T,class K>
+bool HashTable<T, K>::_remove(const long address, T &dataOut, const K key)
 {
-    const int address = getAddress(key);
-    const int index = _find(address, key);
-    
-    if (index >= 0)
+    for(int i=0; i<size_bucket; i++)
     {
-        return bucket[address][index].data;
-    }
-    return nullptr;
-}
-
-template<class T>
-int HashTable<T>::_find(const int address, const int key)
-{
-    for(int i=0; i < bucket_size; ++i)
-    {
-        if (key == bucket[address][i].key)
+        if(bucket[address].data[i] != nullptr)
         {
-            return i;
+            if(cmp(bucket[address].data[i], key) == 1)
+            {
+                dataOut = *bucket[address].data[i];
+                bucket[address].data[i] = nullptr;
+                return true;
+            }
         }
+
     }
-    return -1;
+
+    return false;
 }
 
-#endif /* HashTable.h */
+/*
+ this is a private function, which is accessed by _find function
+ return true if the item is found in the hashtable
+ */
+
+template<class T,class K>
+bool HashTable<T, K>::_find(const long address, T &dataOut, const K key)
+{
+
+    for(int i=0; i<size_bucket; i++)
+    {
+        if(bucket[address].data[i] != nullptr)
+        {
+            if(cmp(bucket[address].data[i], key) == 1)
+            {
+                dataOut = *bucket[address].data[i];
+                return true;
+            }
+
+        }
+
+    }
+
+    return false;
+}
+
+/*
+ release all the memory has been dymically allocated
+ */
+template<class T,class K>
+HashTable<T, K>::~HashTable()
+{
+    for(int i=0; i<SIZE; i++)
+    {
+        for(int j=0; j<size_bucket; j++)
+            delete bucket[i].data[j];
+    }
+    delete bucket;
+}
+
+#endif /* Hash_h */

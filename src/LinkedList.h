@@ -7,7 +7,7 @@ private:
     int (*cmp)(const T*, const K&);
 
     struct ListNode {
-        T *data;
+        T const *data;
         ListNode *next;
     };
 
@@ -15,18 +15,17 @@ private:
 
 public:
     LinkedList(int (*cmp)(const T*, const K&));
-
     ~LinkedList();
-
     bool insert(const T*);
-    bool remove(const K&);
-    T *search(const K&);
+    bool remove(const K&, T& dataOut);
+    bool search(const K&, T&);
 };
 
 template <class T, class K>
 LinkedList<T, K>::LinkedList(int (*cmp)(const T*, const K&))
 {
-    head = new ListNode {0};
+    head = new ListNode;
+    head = nullptr;
     this->cmp = cmp;
 }
 
@@ -46,37 +45,60 @@ LinkedList<T, K>::~LinkedList()
 template <class T, class K>
 bool LinkedList<T, K>::insert(const T *newRecord)
 {
-    ListNode *curr, *prev, *newNode;
+    ListNode *newNode;
+    newNode = new ListNode;
+    newNode->data = newRecord;
+    newNode->next = nullptr;
 
-    while (curr && cmp(curr, newRecord) < 0)
+    if(head == nullptr)
+        head = newNode;
+
+    else
     {
-        prev = curr;
-        curr = curr->next;
+        ListNode *curr = head;
+        while (curr->next)
+            curr = curr->next;
+
+        curr->next = newNode;
     }
 
-    if (cmp(curr, newRecord))
-    {
-        newNode = new ListNode;
-        newNode->data = newRecord;
-        prev->next = newNode;
-        newNode->next = curr;
-    }
+    return true;
 }
 
+
+
 template <class T, class K>
-bool LinkedList<T, K>::remove(const K &removalKey)
+bool LinkedList<T, K>::remove(const K &removalKey, T& dataOut)
 {
     ListNode *curr, *prev;
 
-    while (curr && cmp(curr, removalKey) > 0)
+    if(head == nullptr)
+        return false;
+
+    curr = head;
+    if(cmp(curr->data, removalKey) == 1)
+    {
+        dataOut = *curr->data;
+        head = curr->next;
+        delete curr;
+
+        return true;
+    }
+
+    prev = head;
+    curr = head->next;
+
+    while (curr && cmp(curr->data, removalKey) == 0)
     {
         prev = curr;
         curr = curr->next;
     }
 
-    if (!cmp(curr, removalKey))
+    if (curr && cmp(curr->data, removalKey) == 1)
     {
+        dataOut = *curr->data;
         prev->next = curr->next;
+        curr->data = nullptr;
         delete curr;
 
         return true;
@@ -86,17 +108,21 @@ bool LinkedList<T, K>::remove(const K &removalKey)
 }
 
 template <class T, class K>
-T *LinkedList<T, K>::search(const K &searchKey)
+bool LinkedList<T, K>::search(const K &searchKey, T& dataOut)
 {
     ListNode *nodePtr = head;
 
-    while (nodePtr && cmp(nodePtr, searchKey) > 0)
+    while (nodePtr)
+    {
+        if (cmp(nodePtr->data, searchKey) == 1)
+        {
+            dataOut = *nodePtr->data;
+            return true;
+        }
         nodePtr = nodePtr->next;
+    }
 
-    if (!cmp(nodePtr, searchKey))
-        return nodePtr;
-
-    return nullptr;
+    return false;
 }
 
 
