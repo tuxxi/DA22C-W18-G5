@@ -62,7 +62,7 @@ private:
         BinaryNode(const T& anItem, BinaryNode* left, BinaryNode* right)
             : item(anItem), leftPtr(left), rightPtr(right) {}
 
-        bool isLeaf() const {return (leftPtr == nullptr && rightPtr == nullptr);}
+        bool isLeaf() const { return (leftPtr == nullptr && rightPtr == nullptr);}
     };
     typedef BinarySearchTree<T>::BinaryNode node;
 
@@ -283,7 +283,14 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_remove(node* nodePtr, 
         success = false;
         return nullptr;
     }
-    if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
+    //first check if we found the right value
+    if (compare(nodePtr->item, target) == COMPARE_FN::EQUAL_TO)
+    {
+        nodePtr = deleteNode(nodePtr);
+        success = true;
+        --this->count;
+    }
+    else if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
     {
         nodePtr->leftPtr = _remove(nodePtr->leftPtr, target, success);
     }
@@ -291,12 +298,11 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_remove(node* nodePtr, 
     {
         nodePtr->rightPtr = _remove(nodePtr->rightPtr, target, success);
     }
-    else //found target!
+    else //we didn't find it, we have to keep searching
     {
-        nodePtr = deleteNode(nodePtr);
-        success = true;
+        nodePtr->leftPtr = _remove(nodePtr->leftPtr, target, success);
+        nodePtr->rightPtr = _remove(nodePtr->rightPtr, target, success);
     }
-    --this->count;
     return nodePtr;
 }
 //recursive - tries to find a node with value equal to target in the tree rooted at nodePtr.
@@ -309,7 +315,12 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_find(node *nodePtr, co
     {
         return nullptr;
     }
-    if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
+    //check if we found the correct item first
+    if (compare(nodePtr->item, target) == COMPARE_FN::EQUAL_TO)
+    {
+        return nodePtr;
+    }
+    else if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
     {
         _find(nodePtr->leftPtr, target);
     }
@@ -317,9 +328,10 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_find(node *nodePtr, co
     {
         _find(nodePtr->rightPtr, target);
     }
-    else //item == target
+    else //item is a dupe,
     {
-        return nodePtr;
+        _find(nodePtr->rightPtr, target);
+        _find(nodePtr->leftPtr, target);
     }
 }
 
