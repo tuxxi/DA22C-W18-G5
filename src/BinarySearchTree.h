@@ -317,10 +317,8 @@ template<class T>
 typename BinarySearchTree<T>::node* BinarySearchTree<T>::_find(node *nodePtr, const T& target) const
 {
     //base case: null check before we try to access items
-    if (!nodePtr)
-    {
-        return nullptr;
-    }
+    if (!nodePtr) return nullptr;
+
     //check if we found the correct item first
     if (compare(nodePtr->item, target) == COMPARE_FN::EQUAL_TO)
     {
