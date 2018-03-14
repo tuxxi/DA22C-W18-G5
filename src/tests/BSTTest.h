@@ -32,59 +32,6 @@ void check(bool success)
 }
 void doBSTTests()
 {
-
-    BinarySearchTree<std::string> tree1(compare);
-    tree1.insert("10");		// 10
-    tree1.insert("20");		//	 |
-    tree1.insert("30");		//    20
-    tree1.insert("40");		//		|
-    tree1.insert("50");		//		 30
-    //		   |
-    //          40
-    //			  |
-    //			   50
-
-    std::cout << "Tree 1 Preorder: Should be 10 20 30 40 50\n";
-    tree1.preOrder(display);
-    std::cout << "Tree 1 Inorder: Should be 10 20 30 40 50\n";
-    tree1.inOrder(display);
-    std::cout << "Tree 1 Postorder: Should be 50 40 30 20 10\n";
-    tree1.postOrder(display);
-    std::cout  << std::endl;
-
-    std::cout << "Remove the leaf 50: ";
-    bool success = tree1.remove("50");
-    check(success);
-
-    std::cout << "Try to remove the leaf 50 again: ";
-    success = tree1.remove("50");
-    check(success);
-
-    std::cout << "Remove the node 40 that has only a right child: ";
-    success = tree1.remove("40");
-    check(success);
-
-    std::cout << "Tree 1 Preorder: Should be 10 20 30\n";
-    tree1.preOrder(display);
-    std::cout << "Tree 1 Inorder: Should be 10 20 30\n";
-    tree1.inOrder(display);
-    std::cout << "Tree 1 Postorder: Should be 30 20 10\n";
-    tree1.postOrder(display);
-    std::cout  << std::endl;
-
-    std::cout << "Remove the root 10 (has a right subtree): ";
-    success = tree1.remove("10");
-    check(success);
-
-    std::cout << "Tree 1 Preorder: Should be 20 30\n";
-    tree1.preOrder(display);
-    std::cout << "Tree 1 Inorder: Should be 20 30\n";
-    tree1.inOrder(display);
-    std::cout << "Tree 1 Postorder: Should be 30 20\n";
-    tree1.postOrder(display);
-    std::cout  << std::endl;
-
-
     // Part 2: Inserting data in random order
     BinarySearchTree<std::string> tree2(compare);
 
@@ -96,6 +43,8 @@ void doBSTTests()
     tree2.insert("70");
     tree2.insert("30");
     tree2.insert("80");
+    //tree2.insert("80");
+
 
     //       40
     //     /     \
@@ -114,7 +63,7 @@ void doBSTTests()
     std::cout  << std::endl;
 
     std::cout << "Remove the node 70 that has only a right child: ";
-    success = tree2.remove("70");
+    bool success = tree2.remove("70");
     check(success);
     //        40
     //     /     \
@@ -166,53 +115,17 @@ void doBSTTests()
     std::cout  << std::endl;
 
     std::string ret;
-    auto ptr = tree2.getEntry("80");
-    ret = ptr ? *ptr : "no entry";
+    Vector<std::string> results;
+    bool s = tree2.findAllEntries("80", results);
+    ret = s ? results[0] : "no entry";
     std::cout << "Searching for node 80 returns " << ret << std::endl;
 
-    ptr = tree2.getEntry("40");
-    ret = ptr ? *ptr : "no entry";
+    //results.clear();
+    Vector<std::string> results2;
+
+    s = tree2.findAllEntries("40", results2);
+    ret = s ? results2[0] : "no entry";
     std::cout << "Searching for node 40 returns " << ret << std::endl;
-
-
-
-    // Part 3: Copying trees
-    //at this point tree1 has only 20 and 30, so we're gonna reset it
-    BinarySearchTree<std::string> newObj(compare);
-    tree1 = newObj;
-    tree1.insert("10");		// 10
-    tree1.insert("20");		//	 |
-    tree1.insert("30");		//    20
-    tree1.insert("40");		//		|
-    tree1.insert("50");		//		 30
-
-    std::cout << "\nTesting copy constructor: \n";
-    std::cout << "\nOriginal tree1: \n";
-    std::cout << "Tree 1 Inorder: Should be 10 20 30 40 50\n";
-
-    tree1.inOrder(display);
-    BinarySearchTree<std::string> tree1Copy(tree1);
-    std::cout << "Copy of Tree 1 Inorder: Should be 10 20 30 40 50\n";
-    tree1Copy.inOrder(display);
-    std::cout  << std::endl;
-
-    std::cout << "\nTesting overloaded assignment operator: \n";
-    std::cout << "\nAfter assigning Tree 1 to Tree 2, we have: \n";
-    tree2 = tree1;
-
-    std::cout << "Tree 2 Inorder: Should be 10 20 30 40 50\n";
-    tree2.inOrder(display);
-    std::cout  << std::endl;
-
-    std::cout << "Change Tree 2 by removing 10" << std::endl;
-    tree2.remove("10");
-
-    std::cout << "Tree 2 Inorder: Should be 20 30 40 50\n";
-    tree2.inOrder(display);
-    std::cout << "Tree 1 Inorder: Should be 10 20 30 40 50\n";
-    tree1.inOrder(display);
-    std::cout << std::endl;
-
 }
 
 #endif //_BST_TEST

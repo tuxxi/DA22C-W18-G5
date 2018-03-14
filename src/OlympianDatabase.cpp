@@ -115,7 +115,7 @@ const Olympian *OlympianDatabase::searchByAge(int age)
 
     foundRecord.setAge(age);
 
-    //if ((foundRecord = bstAge->getEntry()))
+    //if ((foundRecord = bstAge->findAllEntries()))
 }
 
 const Olympian *OlympianDatabase::searchByHeight(int height)

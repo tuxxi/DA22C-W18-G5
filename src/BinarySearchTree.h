@@ -6,6 +6,7 @@
 #pragma once
 
 #include <iostream>
+#include "Vector.h"
 
 //compare
 enum class COMPARE_FN
@@ -45,7 +46,7 @@ public:
     // remove a node if found
     bool remove(const T& anEntry);
     // find a target node
-    T* getEntry(const T& target) const;
+    bool findAllEntries(const T& target, Vector<T>& results) const;
     // find the smallest node
     T& findSmallest() const;
     // find the largest node
@@ -87,7 +88,7 @@ private:
     //internal remove node: locate and delete target node under nodePtr subtree
     node* _remove(node* nodePtr, const T& target, bool& success);
 
-    node* _find(node *treePtr, const T &target) const;
+    bool _find(node *treePtr, const T &target, Vector<T>& results) const;
     T& _smallest(node *nodePtr) const;
     T& _largest(node* nodePtr) const;
 
@@ -151,13 +152,9 @@ bool BinarySearchTree<T>::remove(const T& target)
 //returns a pointer to the item, indicating that the search may be unsuccessful
 //in which case, returns a null pointer
 template<class T>
-T* BinarySearchTree<T>::getEntry(const T& anEntry) const
+bool BinarySearchTree<T>::findAllEntries(const T &anEntry, Vector<T> &results) const
 {
-    if (auto node = _find(this->rootPtr, anEntry))
-    {
-        return &node->item;
-    }
-    return nullptr;
+    return _find(this->rootPtr, anEntry, results);
 }
 //traverses the tree to find the smallest node in avg O(log n) time
 template<class T>
@@ -311,31 +308,38 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_remove(node* nodePtr, 
     }
     return nodePtr;
 }
-//recursive - tries to find a node with value equal to target in the tree rooted at nodePtr.
-//returns pointer to the node if found, nullptr if not
+//recursive - tries to find all nodes with value equal to target in the tree rooted at nodePtr.
+/** @param results a vector of the items that were found for the search key
+ * @return true if any nodes were found.
+ */
 template<class T>
-typename BinarySearchTree<T>::node* BinarySearchTree<T>::_find(node *nodePtr, const T& target) const
+bool BinarySearchTree<T>::_find(node *nodePtr, const T& target, Vector<T>& results) const
 {
     //base case: null check before we try to access items
-    if (!nodePtr) return nullptr;
+    if (!nodePtr) return false;
 
     //check if we found the correct item first
     if (compare(nodePtr->item, target) == COMPARE_FN::EQUAL_TO)
     {
-        return nodePtr;
+        results.add(nodePtr->item);
+        // search the right subtree for duplicates of the target item
+        _find(nodePtr->rightPtr, target, results);
+        return true;
     }
     else if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
     {
-        _find(nodePtr->leftPtr, target);
+        _find(nodePtr->leftPtr, target, results);
     }
     else if (compare(nodePtr->item, target) == COMPARE_FN::LESS_THAN)
     {
-        _find(nodePtr->rightPtr, target);
+        _find(nodePtr->rightPtr, target, results);
     }
-    else //item is a dupe, search the right subtree for dupes
+    else
     {
-        _find(nodePtr->rightPtr, target);
+        // search the right subtree for duplicates of the target item
+        _find(nodePtr->rightPtr, target, results);
     }
+
 }
 
 //recursive traversal of right side only, the right side contains the largest node
