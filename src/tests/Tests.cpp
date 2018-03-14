@@ -13,7 +13,6 @@ int main()
 #elif _VECTOR_TEST
     doVectorTests();
 #endif
-
     return 0;
 
 }

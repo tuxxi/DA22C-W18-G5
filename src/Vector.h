@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cstring>
+
 template<class T>
 class Vector
 {
@@ -15,13 +16,16 @@ public:
 
     T& operator[](size_t idx);
     T& at(size_t idx) throw(std::runtime_error);
-    bool add(const T& item);
-    bool remove(size_t idx);
-    bool clear();
 
-    size_t count() const;
-    bool empty() const;
+    void add(const T& item);
     bool reserve(size_t size);
+    bool remove(size_t idx);
+    void clear();
+
+    size_t size() const;
+
+    bool empty() const;
+
     T* begin() { return m_array; }
     T* rbegin() { return m_array + m_count - 1; }
     T* end() { return m_array + m_count; }
@@ -32,9 +36,10 @@ private:
     size_t m_arraySize;
     T* m_array;
 };
+
 template<class T>
 Vector<T>::Vector()
-    : m_arraySize(0), m_array(new T[DEFAULT_SIZE]), m_count(0)
+    : m_count(0), m_arraySize(0), m_array(nullptr)
 {
     reserve(DEFAULT_SIZE);
 }
@@ -44,43 +49,7 @@ Vector<T>::~Vector()
     clear();
 }
 template<class T>
-size_t Vector<T>::count() const
-{
-    return m_count;
-}
-template<class T>
-bool Vector<T>::empty() const
-{
-    return m_count == 0;
-}
-template<class T>
-bool Vector<T>::reserve(size_t size)
-{
-    if (size > m_arraySize)
-    {
-        T tmp[m_arraySize];
-        std::memcpy(tmp, begin(), sizeof(T) * m_arraySize);//move the array to a stack allocated temporary
-
-        m_arraySize = size;
-        m_array = new T[size]{}; //reallocate the array, zero-initializing everything for fun and profit
-        std::memcpy(begin(), tmp, sizeof(T) * m_arraySize);
-    }
-    return false;
-}
-template<class T>
-T& Vector<T>::at(size_t idx) throw(std::runtime_error)
-{
-    if (idx < m_count)
-    {
-        return m_array[idx];
-    }
-    else
-    {
-        throw std::runtime_error("Tried to access vector element outside of array bounds");
-    }
-}
-template<class T>
-bool Vector<T>::add(const T& item)
+void Vector<T>::add(const T& item)
 {
     size_t newIdx = m_count;
     if (newIdx >= m_arraySize) //check if we need to resize the array
@@ -93,17 +62,19 @@ bool Vector<T>::add(const T& item)
     m_count++;
 }
 template<class T>
-T& Vector<T>::operator[](size_t idx)
+bool Vector<T>::reserve(size_t size)
 {
-    return at(idx);
-}
-template<class T>
-bool Vector<T>::clear()
-{
-    delete[] m_array;
-    m_arraySize = 0;
-    m_count = 0;
-    return true;
+    if (size > m_arraySize)
+    {
+        auto tmp = new T[size]{}; //reallocate the array, zero-initializing everything for fun and profit
+        std::memmove(tmp, begin(), sizeof(T) * m_arraySize); //move the current array to the new array
+        if (m_array) delete[] m_array; //deallocate the old array IFF it exists
+
+        m_arraySize = size;
+        m_array = tmp;
+        return true;
+    }
+    return false;
 }
 template<class T>
 bool Vector<T>::remove(size_t idx)
@@ -119,5 +90,40 @@ bool Vector<T>::remove(size_t idx)
     }
     return false;
 }
+template<class T>
+void Vector<T>::clear()
+{
+    delete[] m_array;
+    m_array = nullptr;
+    m_arraySize = 0;
+    m_count = 0;
+}
 
+template<class T>
+T& Vector<T>::operator[](size_t idx)
+{
+    return at(idx);
+}
+template<class T>
+T& Vector<T>::at(size_t idx) throw(std::runtime_error)
+{
+    if (idx < m_count)
+    {
+        return m_array[idx];
+    }
+    else
+    {
+        throw std::runtime_error("Tried to access vector element outside of bounds");
+    }
+}
+template<class T>
+bool Vector<T>::empty() const
+{
+    return m_count == 0;
+}
+template<class T>
+size_t Vector<T>::size() const
+{
+    return m_count;
+}
 
