@@ -51,14 +51,14 @@ Vector<T>::~Vector()
 template<class T>
 void Vector<T>::add(const T& item)
 {
-    size_t newIdx = m_count;
+    const size_t newIdx = m_count;
     if (newIdx >= m_arraySize) //check if we need to resize the array
     {
         //resize to 2x the current size
         reserve(m_arraySize * 2);
     }
     //copy the new item into array
-    std::memcpy(begin() + newIdx, &item, sizeof(item));
+    m_array[newIdx] = T(item);
     m_count++;
 }
 template<class T>
@@ -82,7 +82,7 @@ bool Vector<T>::remove(size_t idx)
     if (idx < m_count)
     {
         //shift the vector's elements one place down
-        size_t size = sizeof(T) * (m_count - idx - 1);
+        const size_t size = sizeof(T) * (m_count - idx - 1);
         std::memmove(begin() + idx, begin() + idx + 1,  size);
         m_count--;
         return true;

@@ -66,7 +66,7 @@ private:
 
         bool isLeaf() const { return (leftPtr == nullptr && rightPtr == nullptr);}
     };
-    typedef BinarySearchTree<T>::BinaryNode node;
+    typedef typename BinarySearchTree<T>::BinaryNode node;
 
     COMPARE_FN (*compare)(const T&, const T&); //function pointer to a compare function for T
     unsigned int count;

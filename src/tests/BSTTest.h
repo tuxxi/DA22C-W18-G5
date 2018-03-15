@@ -120,11 +120,10 @@ void doBSTTests()
     ret = s ? results[0] : "no entry";
     std::cout << "Searching for node 80 returns " << ret << std::endl;
 
-    //results.clear();
-    Vector<std::string> results2;
+    results.clear();
 
-    s = tree2.findAllEntries("40", results2);
-    ret = s ? results2[0] : "no entry";
+    s = tree2.findAllEntries("40", results);
+    ret = s ? results[0] : "no entry";
     std::cout << "Searching for node 40 returns " << ret << std::endl;
 }
 
