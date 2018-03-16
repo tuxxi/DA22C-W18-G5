@@ -1,8 +1,11 @@
-#ifdef _VECTOR_TEST
 #pragma once
+#ifdef _VECTOR_TEST
+
 
 #include "../Vector.h"
 #include <iostream>
+#include <ctime>
+#include <string>
 
 void printVector(Vector<int> &v)
 {
@@ -53,6 +56,30 @@ void doVectorTests()
             printVector(v);
         }
     }
+
+    //test a vector of pointers
+    Vector<int*> vecPointers;
+    int a = 5, b = 7, c = 10;
+    vecPointers.add(&a);
+    vecPointers.add(&b);
+    vecPointers.add(&c);
+
+    for (int i = 0; i < 3; ++i)
+    {
+        std::cout << "vecPointers contains " << vecPointers[i] << " , with a value of " << *vecPointers[i] << std::endl;
+    }
+
+    //change the values
+    a = 3;
+    b = 4421;
+    c = -6;
+
+    //they should now be updated
+    for (int i = 0; i < 3; ++i)
+    {
+        std::cout << "vecPointers contains " << vecPointers[i] << " , with a value of " << *vecPointers[i] << std::endl;
+    }
+    c = 5;
 }
 
 #endif

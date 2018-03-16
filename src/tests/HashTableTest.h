@@ -5,8 +5,8 @@
 //  Created by YF on 06/03/2018.
 //  Copyright © 2018 YF. All rights reserved.
 //
-#ifdef _HASHTABLE_TEST
 #pragma once
+#ifdef _HASHTABLE_TEST
 
 #include <iostream>
 #include <string>
