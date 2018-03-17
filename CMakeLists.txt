@@ -24,7 +24,9 @@ set(PROJECT_SRCS
         src/Olympian.h
         src/OlympianDatabase.h src/OlympianDatabase.cpp
         src/tests/BSTTest.h src/tests/VectorTest.h src/tests/HashTableTest.h
-        src/tests/Tests.cpp)
+        src/tests/Tests.cpp
+
+        src/main.cpp)
 
 #normal executable
 add_executable(DA22C_W18_G5 ${PROJECT_SRCS})

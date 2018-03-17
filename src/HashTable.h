@@ -1,6 +1,5 @@
 #include "CompareFunction.h"
 
-
 //
 //  Hash.h
 //  two templates
@@ -53,8 +52,8 @@ public:
     /*
      public functions
      */
-    Hash( int (*cmp)(const T*, const K&), long (*hash)(const K&, const int));
-    ~Hash();
+    HashTable(int(*cmp)(const T*, const K&), long (*hash)(const K&, const int));
+    ~HashTable();
     void insert(const K &key, T&data);
     bool findEntry(const K& key, T &dataOut);
     bool remove(const K&, T &dataOut);
@@ -68,7 +67,7 @@ public:
  the second funciton is the hasing function
  */
 template<class T,class K>
-HashTable<T, K>::Hash(int (*cmp)(const T*, const K&), long (*hash)(const K&, const int))
+HashTable<T, K>::HashTable(int(*cmp)(const T*, const K&), long (*hash)(const K&, const int))
 {
     this->cmp = cmp;
     this->hash = hash;
@@ -101,7 +100,7 @@ void HashTable<T, K>::insert(const K& key, T& data)
     success = _insertion(data, (int)address);
 
     if(!success)
-        list->insert(&data);
+        list->insert_overflow(&data);
 }
 
 /*takes the key and find the object
@@ -115,7 +114,7 @@ bool HashTable<T, K>::findEntry(const K& key, T &dataOut)
 
 
     if(!success)
-        success = list->insert(key, dataOut);
+        success = list->insert_overflow(&dataOut);
 
     return success;
 
@@ -134,7 +133,7 @@ bool HashTable<T, K>::remove(const K& key, T &dataOut)
     success = _remove(address, dataOut, key);
 
     if(!success)
-        success = list->insert(key, dataOut);
+        success = list->insert_overflow(&dataOut);
 
     return success;
 }
@@ -214,7 +213,7 @@ bool HashTable<T, K>::_find(const long address, T &dataOut, const K key)
  release all the memory has been dymically allocated
  */
 template<class T,class K>
-HashTable<T, K>::~Hash()
+HashTable<T, K>::~HashTable()
 {
     for(int i=0; i<SIZE; i++)
     {

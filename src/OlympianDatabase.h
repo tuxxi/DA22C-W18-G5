@@ -1,21 +1,20 @@
 #ifndef OLYMPIAN_DATABASE_H
 #define OLYMPIAN_DATABASE_H
 
-#include <iostream>
-#include <fstream>
 #include <string>
+
 #include "Olympian.h"
-// #include "HashTable.h"
 #include "BinarySearchTree.h"
 #include "Stack.h"
 #include "Vector.h"
 #include "CompareFunction.h"
+#include "HashTable.h"
 
 class OlympianDatabase {
 private:
     int nRecords;
 
-    // HashTable<Olympian*, std::string> *hashTable;
+    HashTable<Olympian*, std::string> *hashTable;
     BinarySearchTree<Olympian*> *ageBst;
     BinarySearchTree<Olympian*> *heightBst;
     Vector<Olympian*> *allRecords;

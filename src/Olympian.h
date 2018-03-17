@@ -55,7 +55,7 @@ private:
     int nBronze;
 };
 
-std::ostream &operator<<(std::ostream &os, const Olympian &olympian)
+inline std::ostream &operator<<(std::ostream &os, const Olympian &olympian)
 {
     os << "Name: " << olympian.name << std::endl;
     os << "Age: " << olympian.age << std::endl;
