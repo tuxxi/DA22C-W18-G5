@@ -1,7 +1,3 @@
-//
-// Created by tuxxi on 3/13/18.
-//
-
 #pragma once
 
 #include <algorithm>
@@ -29,7 +25,7 @@ public:
     T* begin() { return m_array; }
     T* rbegin() { return m_array + m_count - 1; }
     T* end() { return m_array + m_count; }
-    T* rend() { return m_array - 1;}
+    T* rend() { return m_array - 1; }
 private:
     static const size_t DEFAULT_SIZE = 8;
     size_t m_count;
@@ -39,28 +35,32 @@ private:
 
 template<class T>
 Vector<T>::Vector()
-    : m_count(0), m_arraySize(0), m_array(nullptr)
+        : m_count(0), m_arraySize(0), m_array(nullptr)
 {
     reserve(DEFAULT_SIZE);
 }
+
 template<class T>
 Vector<T>::~Vector()
 {
     clear();
 }
+
 template<class T>
 void Vector<T>::add(const T& item)
 {
-    const size_t newIdx = m_count;
+    size_t newIdx = m_count;
     if (newIdx >= m_arraySize) //check if we need to resize the array
     {
         //resize to 2x the current size
         reserve(m_arraySize * 2);
     }
+
     //copy the new item into array
-    m_array[newIdx] = T(item);
+    std::memcpy(begin() + newIdx, &item, sizeof(item));
     m_count++;
 }
+
 template<class T>
 bool Vector<T>::reserve(size_t size)
 {
@@ -76,13 +76,14 @@ bool Vector<T>::reserve(size_t size)
     }
     return false;
 }
+
 template<class T>
 bool Vector<T>::remove(size_t idx)
 {
     if (idx < m_count)
     {
         //shift the vector's elements one place down
-        const size_t size = sizeof(T) * (m_count - idx - 1);
+        size_t size = sizeof(T) * (m_count - idx - 1);
         std::memmove(begin() + idx, begin() + idx + 1,  size);
         m_count--;
         return true;
@@ -90,6 +91,7 @@ bool Vector<T>::remove(size_t idx)
     }
     return false;
 }
+
 template<class T>
 void Vector<T>::clear()
 {
@@ -104,6 +106,7 @@ T& Vector<T>::operator[](size_t idx)
 {
     return at(idx);
 }
+
 template<class T>
 T& Vector<T>::at(size_t idx) throw(std::runtime_error)
 {
@@ -116,14 +119,15 @@ T& Vector<T>::at(size_t idx) throw(std::runtime_error)
         throw std::runtime_error("Tried to access vector element outside of bounds");
     }
 }
+
 template<class T>
 bool Vector<T>::empty() const
 {
     return m_count == 0;
 }
+
 template<class T>
 size_t Vector<T>::size() const
 {
     return m_count;
 }
-

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-class Olympian 
+class Olympian
 {
 public:
     Olympian() = default;
@@ -66,7 +66,7 @@ std::ostream &operator<<(std::ostream &os, const Olympian &olympian)
     os << "Number Silver Medals: " << olympian.nSilver << std::endl;
     os << "Number Bronze Medals: " << olympian.nBronze << std::endl;
 
-   return os;
+    return os;
 }
 
 #endif

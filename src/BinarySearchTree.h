@@ -7,14 +7,7 @@
 
 #include <iostream>
 #include "Vector.h"
-
-//compare
-enum class COMPARE_FN
-{
-    LESS_THAN = -1,
-    EQUAL_TO = 0,
-    GREATER_THAN = 1
-};
+#include "CompareFunction.h"
 
 template<class T>
 class BinarySearchTree
@@ -60,13 +53,13 @@ private:
         BinaryNode* rightPtr;   // Pointer to right child
 
         explicit BinaryNode(const T& anItem)
-            : item(anItem), leftPtr(nullptr), rightPtr(nullptr) {}
+                : item(anItem), leftPtr(nullptr), rightPtr(nullptr) {}
         BinaryNode(const T& anItem, BinaryNode* left, BinaryNode* right)
-            : item(anItem), leftPtr(left), rightPtr(right) {}
+                : item(anItem), leftPtr(left), rightPtr(right) {}
 
         bool isLeaf() const { return (leftPtr == nullptr && rightPtr == nullptr);}
     };
-    typedef typename BinarySearchTree<T>::BinaryNode node;
+    typedef BinarySearchTree<T>::BinaryNode node;
 
     COMPARE_FN (*compare)(const T&, const T&); //function pointer to a compare function for T
     unsigned int count;
@@ -109,13 +102,13 @@ private:
 //default ctor
 template <class T>
 BinarySearchTree<T>::BinarySearchTree(COMPARE_FN (*fn)(const T&, const T&))
-    : rootPtr(nullptr), count(0), compare(fn)
+        : rootPtr(nullptr), count(0), compare(fn)
 {}
 
 //copy assignment ctor
 template <class T>
 BinarySearchTree<T>::BinarySearchTree(const BinarySearchTree<T>& tree)
-    : rootPtr(nullptr), count(0)
+        : rootPtr(nullptr), count(0)
 {
     compare = tree.compare;
     copyTree(tree.rootPtr);

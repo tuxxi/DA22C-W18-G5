@@ -1,34 +1,58 @@
-#ifndef TEAM_PROJECT_OLYMPIANDATABASE_H
-#define TEAM_PROJECT_OLYMPIANDATABASE_H
+#ifndef OLYMPIAN_DATABASE_H
+#define OLYMPIAN_DATABASE_H
 
+#include <iostream>
+#include <fstream>
+#include <string>
 #include "Olympian.h"
-#include "HashTable.h"
+// #include "HashTable.h"
 #include "BinarySearchTree.h"
+#include "Stack.h"
+#include "Vector.h"
+#include "CompareFunction.h"
 
 class OlympianDatabase {
 private:
-    void buildFromFile(std::string);
-    const Olympian *readRecord(std::ifstream&);
-    bool _insert(const Olympian *newRecord);
-    bool _remove(std::string);
-    static COMPARE_FN cmpName(const Olympian&, const Olympian&);
-    static COMPARE_FN cmpAge(const Olympian&, const Olympian&);
-    static COMPARE_FN cmpHeight(const Olympian&, const Olympian&);
-
     int nRecords;
-    HashTable<Olympian, std::string> *hashTable;
-    BinarySearchTree<Olympian> *bstAge;
-    BinarySearchTree<Olympian> *bstHeight;
+
+    // HashTable<Olympian*, std::string> *hashTable;
+    BinarySearchTree<Olympian*> *ageBst;
+    BinarySearchTree<Olympian*> *heightBst;
+    Vector<Olympian*> *allRecords;
+    Stack<Olympian*> *deletionStack;
+
+    bool _buildDatabase(std::ifstream&);
+    Olympian *_readRecord(std::ifstream&);
+    bool _insert(Olympian*);
+    bool _remove(std::string);
+
+    static COMPARE_FN cmpName(Olympian *const &, Olympian *const &);
+    static COMPARE_FN cmpAge(Olympian *const &, Olympian *const &);
+    static COMPARE_FN cmpHeight(Olympian *const &, Olympian *const &);
+    static void printOlympian(Olympian*&);
 
 public:
-    OlympianDatabase(int, int, std::string);
+    OlympianDatabase(std::ifstream&);
 
     ~OlympianDatabase();
 
+    int getnRecords() { return nRecords; }
+
+    bool insert(Olympian*);
     bool remove(std::string);
-    const Olympian *searchByName(std::string);
-    const Olympian *searchByAge(int);
-    const Olympian *searchByHeight(int);
+    bool undoDelete();
+    Olympian *searchByName(std::string);
+    Vector<Olympian*> searchByAge(int);
+    Vector<Olympian*> searchByHeight(int);
+    Vector<Olympian*> getYoungest();
+    Vector<Olympian*> getOldest();
+    Vector<Olympian*> getShortest();
+    Vector<Olympian*> getTallest();
+    void displayAgeInOrder();
+    void displayHeightInOrder();
+    void displayAgeTree();
+    void displayHeightTree();
 };
 
-#endif //TEAM_PROJECT_OLYMPIANDATABASE_H
+
+#endif // OLYMPIAN_DATABASE_H

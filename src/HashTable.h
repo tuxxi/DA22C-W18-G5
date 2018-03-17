@@ -1,3 +1,6 @@
+#include "CompareFunction.h"
+
+
 //
 //  Hash.h
 //  two templates
@@ -10,12 +13,13 @@
 #define Hash_h
 #include <iostream>
 #include <string>
-#include "LinkList.h"
+#include "LinkedList.h"
 #include "Stack.h"
+
 const int SIZE = 10;
 const int size_bucket = 3;
 template<class T, class K>
-class Hash
+class HashTable
 {
 private:
     struct Bucket
@@ -24,22 +28,22 @@ private:
         bool empty[size_bucket];
         int count;
     };
-   
+
     // these are two function pointers
     int (*cmp)(const T*, const K&);
     long (*hash)(const K&, const int);
-    
+
     //a linklist pointer
     LinkedList<T, K> *list;
-    
+
     //dymically allocate memory for bucket
     Bucket *bucket;
     int resize = SIZE;
     double load_factor = 0;
     int bucket_used = 0;
-    
+
     /*
-     the functions below are called by the public functions 
+     the functions below are called by the public functions
      cannot be accessed by other classes's member functions
     */
     bool _insertion(const T&, const int address);
@@ -51,10 +55,10 @@ public:
      */
     Hash( int (*cmp)(const T*, const K&), long (*hash)(const K&, const int));
     ~Hash();
-    void insert(const K&key, const T&data);
+    void insert(const K &key, T&data);
     bool findEntry(const K& key, T &dataOut);
     bool remove(const K&, T &dataOut);
-    
+
 };
 
 /*
@@ -64,22 +68,22 @@ public:
  the second funciton is the hasing function
  */
 template<class T,class K>
-Hash<T, K>::Hash(int (*cmp)(const T*, const K&), long (*hash)(const K&, const int))
+HashTable<T, K>::Hash(int (*cmp)(const T*, const K&), long (*hash)(const K&, const int))
 {
-     this->cmp = cmp;
-     this->hash = hash;
-     list = new LinkedList<T, K>(this->cmp);
-    
+    this->cmp = cmp;
+    this->hash = hash;
+    list = new LinkedList<T, K>(this->cmp);
+
     bucket = new Bucket[SIZE];
-      for(int i=0; i<SIZE; i++)
+    for(int i=0; i<SIZE; i++)
     {
         bucket[i].count = 0;
-     
+
         for(int j=0; j<size_bucket; j++)
         {
-              bucket[i].data[j] = new T;
-              bucket[i].data[j] = nullptr;
-              bucket[i].empty[j] = true;
+            bucket[i].data[j] = new T;
+            bucket[i].data[j] = nullptr;
+            bucket[i].empty[j] = true;
         }
     }
 }
@@ -89,33 +93,32 @@ Hash<T, K>::Hash(int (*cmp)(const T*, const K&), long (*hash)(const K&, const in
  */
 
 template<class T,class K>
-void Hash<T, K>::insert(const K& key, const T& data)
+void HashTable<T, K>::insert(const K& key, T& data)
 {
     long address = hash(key, SIZE);
-    
+
     bool success;
     success = _insertion(data, (int)address);
-    
-   if(!success)
-       list->insert_overflow(&data);
-  
+
+    if(!success)
+        list->insert(&data);
 }
 
 /*takes the key and find the object
  return true if the item is found
  */
 template<class T,class K>
-bool Hash<T, K>::findEntry(const K& key, T &dataOut)
+bool HashTable<T, K>::findEntry(const K& key, T &dataOut)
 {
     long address = hash(key, SIZE);
     bool success = _find(address, dataOut, key);
-    
-    
+
+
     if(!success)
-        success = list->search_overflow(key, dataOut);
-    
+        success = list->insert(key, dataOut);
+
     return success;
-    
+
 }
 
 /*
@@ -123,26 +126,26 @@ bool Hash<T, K>::findEntry(const K& key, T &dataOut)
  return true if the deletion is successful
  */
 template<class T,class K>
-bool Hash<T, K>::remove(const K& key, T &dataOut)
+bool HashTable<T, K>::remove(const K& key, T &dataOut)
 {
     long address = hash(key, SIZE);
-    
+
     bool success;
     success = _remove(address, dataOut, key);
-    
+
     if(!success)
-        success = list->remove_overflow(key, dataOut);
+        success = list->insert(key, dataOut);
 
     return success;
 }
 
 
 /*
- this is a private function, which is accessed by insert function 
+ this is a private function, which is accessed by insert function
  add a new item in the hashtable if that bucket still has vacant place
  */
 template<class T,class K>
-bool Hash<T, K>::_insertion(const T& data, const int address)
+bool HashTable<T, K>::_insertion(const T& data, const int address)
 {
 
     for(int i=0; i<size_bucket; i++)
@@ -155,22 +158,22 @@ bool Hash<T, K>::_insertion(const T& data, const int address)
             return true;
         }
     }
-    
+
     return false;
 }
 
 /*
- this is a private function, which is accessed by delete function 
+ this is a private function, which is accessed by delete function
  remove the item if the item is found in the hashtable
  */
 template<class T,class K>
-bool Hash<T, K>::_remove(const long address, T &dataOut, const K key)
+bool HashTable<T, K>::_remove(const long address, T &dataOut, const K key)
 {
     for(int i=0; i<size_bucket; i++)
     {
         if(bucket[address].data[i] != nullptr)
         {
-            if(cmp(bucket[address].data[i], key) == 1)
+            if(cmp(bucket[address].data[i], key) == 0)
             {
                 dataOut = *bucket[address].data[i];
                 bucket[address].data[i] = nullptr;
@@ -178,33 +181,32 @@ bool Hash<T, K>::_remove(const long address, T &dataOut, const K key)
                 return true;
             }
         }
-        
+
     }
-    
+
     return false;
 }
 
 /*
- this is a private function, which is accessed by _find function 
+ this is a private function, which is accessed by _find function
  return true if the item is found in the hashtable
  */
 
 template<class T,class K>
-bool Hash<T, K>::_find(const long address, T &dataOut, const K key)
+bool HashTable<T, K>::_find(const long address, T &dataOut, const K key)
 {
-
-    for(int i=0; i<size_bucket; i++)
+    for(int i=0; i< bucket[address].count; i++)
     {
-       if(bucket[address].data[i] != nullptr)
-       {
-        if(cmp(bucket[address].data[i], key) == 1)
+        if(bucket[address].data[i] != nullptr)
         {
-            dataOut = *bucket[address].data[i];
-            return true;
-        }
+            if(cmp(bucket[address].data[i], key) == 1)
+            {
+                dataOut = *bucket[address].data[i];
+                return true;
+            }
         }
     }
-    
+
     return false;
 }
 
@@ -212,7 +214,7 @@ bool Hash<T, K>::_find(const long address, T &dataOut, const K key)
  release all the memory has been dymically allocated
  */
 template<class T,class K>
-Hash<T, K>::~Hash()
+HashTable<T, K>::~Hash()
 {
     for(int i=0; i<SIZE; i++)
     {
@@ -220,7 +222,7 @@ Hash<T, K>::~Hash()
             delete bucket[i].data[j];
     }
     delete bucket;
-    
+
 }
 
 #endif /* Hash_h */
