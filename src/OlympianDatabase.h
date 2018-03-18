@@ -51,6 +51,7 @@ public:
     void displayHeightInOrder();
     void displayAgeTree();
     void displayHeightTree();
+    void displayHashStats();
     void saveDatabase(std::ofstream&);
 };
 
