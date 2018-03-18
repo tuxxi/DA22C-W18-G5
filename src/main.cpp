@@ -3,49 +3,86 @@
 //  22C_Team_Project_Interface
 //
 //  Created by Ashley Cline on 3/14/18.
-//  Copyright © 2018 Ashley Cline. All rights reserved.
-//
 
 #include <fstream>
 #include <iostream>
 #include <string>
 #include "OlympianDatabase.h"
 
-void saveOutFile();
+ifstream getCmndLineInfile(int, const char *[]);
 int getChoice();
 void displayMenu();
 void implementDecision(int choice, OlympianDatabase &olympic);
 void searchSubMenu();
 void listSubMenu();
+ofstream &getOutfile(string infileName);
 
+using namespace std;
 
 int main(int argc, const char * argv[])
 {
-    std::ifstream file("data/winter-olympians.csv");
-    if (!file) return -1;
+    int choice;
+    ifstream infile = getCmndLineInfile(argc, argv);
+    ofstream outfile;
 
-    OlympianDatabase olympic(file);
+    if (!infile) return -1;
 
-    displayMenu();
-    int choice = getChoice();
+    OlympianDatabase olympianDatabase(infile);
 
-    while (choice != 8)
+    while ((choice = getChoice()) != 8)
     {
-        implementDecision(choice, olympic);
+        implementDecision(choice, olympianDatabase);
         displayMenu();
     }
 
-    // write output to file
+    olympianDatabase.saveDatabase(outfile);
 
     return 0;
+}
+
+ifstream getCmndLineInfile(int argc, const char *argv[])
+{
+    string infileName;
+
+    if (!argc)
+    {
+        cerr << "Cannot build database. An input file was not specified. Exiting." << endl;
+        exit(1);
+    }
+
+    infileName = argv[1];
+
+    ifstream infile(infileName);
+
+    if (!infile)
+    {
+        cerr << "The file " << infileName << " could not be opened. Exiting" << endl;
+        exit(1);
+    }
+
+    return infile;
 }
 
 int getChoice()
 {
     int choice = 0;
-    std::cin >> choice;
+    char input;
+
+    displayMenu();
+
+    input = cin.get();
+
+    while ((choice = atoi(&input)) < 1 || choice > 8)
+    {
+        cout << "You did not enter a valid option. Please enter a number between 1 and 8.\n";
+
+        input = cin.get();
+    }
+
     return choice;
 }
+
+
 
 void displayMenu()
 {
