@@ -4,24 +4,23 @@
 #include <string>
 
 using namespace std;
-long _hash(const std::string&, const int)
-{
-    return 0;
-}
-int _compare(Olympian* const* o , const std::string& s)
-{
-    return 0;
-}
+
+static const int BUCKET_SIZE = 3;
+static const int SIZE = 256;
 
 OlympianDatabase::OlympianDatabase(ifstream &infile)
 {
-    hashTable = new HashTable<Olympian*, string>(_compare, _hash);
+    hashTable = new HashTable<Olympian*>(cmpName, _hash, SIZE, BUCKET_SIZE);
     ageBst = new BinarySearchTree<Olympian*>(cmpAge);
     heightBst = new BinarySearchTree<Olympian*>(cmpHeight);
+    allRecords = new Vector<Olympian*>;
+    deletionStack = new Stack<Olympian*>;
+    _buildDatabase(infile);
 }
 
 bool OlympianDatabase::undoDelete()
 {
+
     Olympian *lastDeleted;
 
     if (deletionStack->pop(lastDeleted))
@@ -38,7 +37,6 @@ bool OlympianDatabase::undoDelete()
     }
 
     cout << "\nThere are no previous deletions to undo.\n" << endl;
-
     return false;
 
 }
@@ -48,42 +46,41 @@ bool OlympianDatabase::insert(Olympian *newRecord)
     return _insert(newRecord);
 }
 
-bool OlympianDatabase::remove(std::string s)
+bool OlympianDatabase::remove(string s)
 {
     return _remove(s);
 }
 
 Olympian *OlympianDatabase::searchByName(string name)
 {
-    Olympian *foundRecord;
+    Olympian o;
+    auto foundRecord = &o;
+    foundRecord->setName(name);
 
-    if (hashTable->findEntry(name, foundRecord))
+    if (hashTable->findEntry(foundRecord))
         return foundRecord;
 
     return nullptr;
 }
 
-Vector<Olympian*> OlympianDatabase::searchByAge(int age)
+bool OlympianDatabase::searchByAge(int age, Vector<Olympian*>& vecResults)
 {
-    Vector<Olympian*> results;
     Olympian oly;
     auto searchObj = &oly;
     searchObj->setAge(age);
 
-    ageBst->findAllEntries(searchObj, results);
-    return results;
+    ageBst->findAllEntries(searchObj, vecResults);
+    return !vecResults.empty();
 }
 
-Vector<Olympian*> OlympianDatabase::searchByHeight(int height)
+bool OlympianDatabase::searchByHeight(int height, Vector<Olympian*>& vecResults)
 {
-    Vector<Olympian*> results;
-
     Olympian oly;
     auto searchObj = &oly;
     searchObj->setHeight(height);
 
-    heightBst->findAllEntries(searchObj, results);
-    return results;
+    heightBst->findAllEntries(searchObj, vecResults);
+    return !vecResults.empty();
 }
 
 Vector<Olympian*> OlympianDatabase::getYoungest()
@@ -136,27 +133,43 @@ void OlympianDatabase::displayHeightInOrder()
 
 void OlympianDatabase::displayAgeTree()
 {
-    ageBst->inOrder(printOlympian);
+    std::cout << *ageBst << std::endl;
 }
 
 void OlympianDatabase::displayHeightTree()
 {
-    heightBst->inOrder(printOlympian);
+    std::cout << *heightBst << std::endl;
+}
+
+void OlympianDatabase::displayHashStats()
+{
+
+}
+
+void OlympianDatabase::saveDatabase(std::ofstream&)
+{
+
 }
 
 bool OlympianDatabase::_buildDatabase(ifstream &infile)
 {
     Olympian *newRecord;
 
-    while ((newRecord = _readRecord(infile)))
+    size_t lineNum = 1; //skip first line
+    while ((newRecord = _readRecord(infile, lineNum++)))
         _insert(newRecord);
     return true;
 }
 
-Olympian *OlympianDatabase::_readRecord(std::ifstream &infile)
+Olympian *OlympianDatabase::_readRecord(std::ifstream &infile, size_t lineNum)
 {
-    string input, firstName, lastName, sport, gender, infileName = "winter-olympians.csv";
-    int nGold, nSilver, nBronze, age, height;
+    //seek to the given line num
+    infile.seekg(std::ios::beg);
+    for (int i = 0; i < lineNum; ++i) {
+        infile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+    string input, firstName, lastName, sport, gender;
+    int nGold, nSilver, nBronze;
 
     while(getline(infile, firstName, ','))
     {
@@ -200,79 +213,100 @@ Olympian *OlympianDatabase::_readRecord(std::ifstream &infile)
 
             getline(infile, input, '"');
             getline(infile, input, '\'');
-            height = 12 * stoi(input);
+            int height = 12 * stoi(input);
             getline(infile, input, '"');
             height += stoi(input);
 
             for (int i = 0; i < 5; i++)
                 getline(infile, input, ',');
-            age = stoi(input);
+            int age = stoi(input);
 
-            cout << lastName + ", " << firstName << "; " << sport << "; "  << nGold << ", " << nSilver << ", " << nBronze << endl;
+            getline(infile, input, ',');
+            getline(infile, input, ',');
+            string state = input;
+
+#ifdef _DEBUG
+            cout << lastName + ", " << firstName << ": " << gender << "; " << sport << "; "<< height << ", " << age << "; " << state << endl;
+#endif
+            string fullname = firstName + " " + lastName;
+
+            auto newEntry = new Olympian(fullname, sport, state, gender[0], age, height, nGold, nSilver, nBronze);
+            allRecords->add(newEntry);
+            return newEntry;
         }
-        getline(infile, input);
     }
+    //EOF or malformed line
+    return nullptr;
 
 }
 
 bool OlympianDatabase::_insert(Olympian *newRecord)
 {
-    hashTable->insert(newRecord->getName(), newRecord);
-    //if ()
-        if (ageBst->insert(newRecord))
-            if (heightBst->insert(newRecord))
-            {
-                allRecords->add(newRecord);
+    //insert into hash table
+    hashTable->insert(newRecord);
 
-                return true;
-            }
-            else
-                ageBst->remove(newRecord);
-        else
-            hashTable->remove(newRecord->getName(), newRecord);
+    bool success = true;
+    if (!ageBst->insert(newRecord)) success = false;
+    if (!heightBst->insert(newRecord)) success = false;
 
-    return false;
+    if (!success)
+    {
+        ageBst->remove(newRecord);
+        hashTable->remove(newRecord);
+        return false;
+    }
+
+    return true;
 }
 
-bool OlympianDatabase::_remove(string)
+bool OlympianDatabase::_remove(string name)
 {
-    Olympian *foundRecord;
+    Olympian o;
+    auto foundRecord = &o;
+    foundRecord->setName(name);
 
+    bool success = true;
+    if (!hashTable->remove(foundRecord)) success = false;
+    if (!ageBst->remove(foundRecord)) success = false;
+    if (!heightBst->remove(foundRecord)) success = false;
 
-    if (hashTable->remove(foundRecord->getName(), foundRecord))
-        if (ageBst->remove(foundRecord))
-            if (heightBst->remove(foundRecord))
-            {
-                deletionStack->push(foundRecord);
-
-                return true;
-            }
-            else
-                ageBst->insert(foundRecord);
-        else
-            hashTable->insert(foundRecord->getName(), foundRecord);
-
-    return false;
+    if (!success)
+    {
+        ageBst->insert(foundRecord);
+        hashTable->insert(foundRecord);
+        return false;
+    }
+    //deletionStack->push(foundRecord);
+    return true;
 }
+long OlympianDatabase::_hash(Olympian* object, const int size)
+{
+    string key = object->getName();
+    int sum = 0;
+    for (int i = 0; i < key.size(); i++)
+        sum += key[i] * key[i] * key[i];
 
+    return sum % size;
+}
 COMPARE_FN OlympianDatabase::cmpName(Olympian *const &a, Olympian *const &b)
 {
+    if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_TO;
     if (a->getName() < b->getName()) return COMPARE_FN::LESS_THAN;
-    else if (a->getName() > b->getName()) return COMPARE_FN::GREATER_THAN;
+    if (a->getName() > b->getName()) return COMPARE_FN::GREATER_THAN;
     return COMPARE_FN::EQUAL_TO;
 }
 COMPARE_FN OlympianDatabase::cmpAge(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_TO;
-    else if (a->getAge() < b->getAge()) return COMPARE_FN::LESS_THAN;
-    else if (a->getAge() > b->getAge()) return COMPARE_FN::GREATER_THAN;
+    if (a->getAge() < b->getAge()) return COMPARE_FN::LESS_THAN;
+    if (a->getAge() > b->getAge()) return COMPARE_FN::GREATER_THAN;
     return COMPARE_FN::EQUAL_TO;
 }
 COMPARE_FN OlympianDatabase::cmpHeight(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_TO;
-    else if (a->getHeight() < b->getHeight()) return COMPARE_FN::LESS_THAN;
-    else if (a->getHeight() > b->getHeight()) return COMPARE_FN::GREATER_THAN;
+    if (a->getHeight() < b->getHeight()) return COMPARE_FN::LESS_THAN;
+    if (a->getHeight() > b->getHeight()) return COMPARE_FN::GREATER_THAN;
     return COMPARE_FN::EQUAL_TO;
 }
 
@@ -287,5 +321,10 @@ OlympianDatabase::~OlympianDatabase()
     delete ageBst;
     delete heightBst;
     delete deletionStack;
+
+    for (auto entry : *allRecords)
+    {
+        delete entry;
+    }
     delete allRecords;
 }

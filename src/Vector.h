@@ -49,15 +49,15 @@ Vector<T>::~Vector()
 template<class T>
 void Vector<T>::add(const T& item)
 {
-    size_t newIdx = m_count;
+    const size_t newIdx = m_count;
     if (newIdx >= m_arraySize) //check if we need to resize the array
     {
         //resize to 2x the current size
         reserve(m_arraySize * 2);
     }
 
-    //copy the new item into array
-    std::memcpy(begin() + newIdx, &item, sizeof(item));
+    //copy the new item into array using T's copy constructor
+    m_array[newIdx] = T(item);    
     m_count++;
 }
 
@@ -83,7 +83,7 @@ bool Vector<T>::remove(size_t idx)
     if (idx < m_count)
     {
         //shift the vector's elements one place down
-        size_t size = sizeof(T) * (m_count - idx - 1);
+        const size_t size = sizeof(T) * (m_count - idx - 1);
         std::memmove(begin() + idx, begin() + idx + 1,  size);
         m_count--;
         return true;
@@ -114,10 +114,9 @@ T& Vector<T>::at(size_t idx) throw(std::runtime_error)
     {
         return m_array[idx];
     }
-    else
-    {
-        throw std::runtime_error("Tried to access vector element outside of bounds");
-    }
+    //we did an oopsie
+    throw std::runtime_error("Tried to access vector element outside of bounds");
+
 }
 
 template<class T>

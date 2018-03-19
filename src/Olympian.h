@@ -60,6 +60,7 @@ inline std::ostream &operator<<(std::ostream &os, const Olympian &olympian)
     os << "Name: " << olympian.name << std::endl;
     os << "Age: " << olympian.age << std::endl;
     os << "Gender: " << olympian.gender << std::endl;
+    os << "Height: " << olympian.height << std::endl;
     os << "State: " << olympian.state << std::endl;
     os << "Sport: " << olympian.sport << std::endl;
     os << "Number Gold Medals: " << olympian.nGold << std::endl;

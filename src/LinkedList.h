@@ -1,10 +1,10 @@
 #ifndef TEAM_PROJECT_LINKEDLIST
 #define TEAM_PROJECT_LINKEDLIST
-
-template <class T, class K>
+#include "CompareFunction.h"
+template <class T>
 class LinkedList {
 private:
-    int(*cmp)(const T*, const K&);
+    COMPARE_FN(*cmp)(const T&, const T&);
 
     struct ListNode {
         T const *data;
@@ -14,23 +14,23 @@ private:
     ListNode *head;
 
 public:
-    LinkedList(int(*cmp)(const T*, const K&));
+    LinkedList(COMPARE_FN(*cmp)(const T&, const T&));
     ~LinkedList();
-    bool insert_overflow(const T*);
-    bool remove_overflow(const K&, T& dataOut);
-    bool search_overflow(const K&, T&);
+    bool insert_overflow(const T&);
+    bool remove_overflow(T &dataOut);
+    bool search_overflow(T &dataOut);
 };
 
-template <class T, class K>
-LinkedList<T, K>::LinkedList(int(*cmp)(const T*, const K&))
+template <class T>
+LinkedList<T>::LinkedList(COMPARE_FN(*cmp)(const T&, const T&))
 {
     head = new ListNode;
     head = nullptr;
     this->cmp = cmp;
 }
 
-template <class T, class K>
-LinkedList<T, K>::~LinkedList()
+template <class T>
+LinkedList<T>::~LinkedList()
 {
     ListNode *curr = head, *prev;
 
@@ -42,12 +42,12 @@ LinkedList<T, K>::~LinkedList()
     }
 }
 
-template <class T, class K>
-bool LinkedList<T, K>::insert_overflow(const T *newRecord)
+template <class T>
+bool LinkedList<T>::insert_overflow(const T &newRecord)
 {
     ListNode *newNode;
     newNode = new ListNode;
-    newNode->data = newRecord;
+    newNode->data = &newRecord;
     newNode->next = nullptr;
 
     if (head == nullptr)
@@ -67,8 +67,8 @@ bool LinkedList<T, K>::insert_overflow(const T *newRecord)
 
 
 
-template <class T, class K>
-bool LinkedList<T, K>::remove_overflow(const K &removalKey, T& dataOut)
+template <class T>
+bool LinkedList<T>::remove_overflow(T &dataOut)
 {
     ListNode *curr, *prev;
 
@@ -76,7 +76,7 @@ bool LinkedList<T, K>::remove_overflow(const K &removalKey, T& dataOut)
         return false;
 
     curr = head;
-    if (cmp(curr->data, removalKey) == 1)
+    if (cmp(*curr->data, dataOut) == COMPARE_FN::EQUAL_TO)
     {
         dataOut = *curr->data;
         head = curr->next;
@@ -88,13 +88,13 @@ bool LinkedList<T, K>::remove_overflow(const K &removalKey, T& dataOut)
     prev = head;
     curr = head->next;
 
-    while (curr && cmp(curr->data, removalKey) == 0)
+    while (curr && !(cmp(*curr->data, dataOut) == COMPARE_FN::EQUAL_TO))
     {
         prev = curr;
         curr = curr->next;
     }
 
-    if (curr && cmp(curr->data, removalKey) == 1)
+    if (curr && cmp(*curr->data, dataOut) == COMPARE_FN::EQUAL_TO)
     {
         dataOut = *curr->data;
         prev->next = curr->next;
@@ -107,14 +107,14 @@ bool LinkedList<T, K>::remove_overflow(const K &removalKey, T& dataOut)
     return false;
 }
 
-template <class T, class K>
-bool LinkedList<T, K>::search_overflow(const K &searchKey, T& dataOut)
+template <class T>
+bool LinkedList<T>::search_overflow(T &dataOut)
 {
     ListNode *nodePtr = head;
 
     while (nodePtr)
     {
-        if (cmp(nodePtr->data, searchKey) == 1)
+        if (cmp(*nodePtr->data, dataOut) == COMPARE_FN::EQUAL_TO)
         {
             dataOut = *nodePtr->data;
             return true;

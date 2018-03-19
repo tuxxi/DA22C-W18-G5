@@ -9,6 +9,8 @@
 #include <string>
 #include "OlympianDatabase.h"
 
+using namespace std;
+
 ifstream getCmndLineInfile(int, const char *[]);
 int getChoice();
 void displayMenu();
@@ -18,13 +20,19 @@ void listSubMenu();
 void printVector(Vector<Olympian*> &vector);
 ofstream getOutfile(string infileName);
 
-using namespace std;
 
 int main(int argc, const char * argv[])
 {
     int choice;
-    ifstream infile = getCmndLineInfile(argc, argv);
-    ofstream outfile;
+    ifstream infile;
+    if (argc > 1)
+    {
+        infile = getCmndLineInfile(argc, argv);
+    }
+    else //default file jic
+    {
+        infile = ifstream("winter-olympians.csv");
+    }
 
     if (!infile) return -1;
 
@@ -36,6 +44,7 @@ int main(int argc, const char * argv[])
         displayMenu();
     }
 
+    ofstream outfile;
     olympianDatabase.saveDatabase(outfile);
 
     return 0;
@@ -43,15 +52,14 @@ int main(int argc, const char * argv[])
 
 ifstream getCmndLineInfile(int argc, const char *argv[])
 {
-    string infileName;
 
-    if (!argc)
+    if (argc <= 1) //argc includes the name of the program in the count, similar to how argv[0] is the name of the program
     {
         cerr << "Cannot build database. An input file was not specified. Exiting." << endl;
-        exit(1);
+        exit(-1);
     }
 
-    infileName = argv[1];
+    const string infileName = argv[1];
 
     ifstream infile(infileName);
 
@@ -67,11 +75,10 @@ ifstream getCmndLineInfile(int argc, const char *argv[])
 int getChoice()
 {
     int choice = 0;
-    char input;
 
     displayMenu();
 
-    input = cin.get();
+    char input = cin.get();
 
     while ((choice = atoi(&input)) < 1 || choice > 8)
     {
@@ -102,128 +109,162 @@ void implementDecision(int choice, OlympianDatabase &olympianDatabase)
 {
     int searchOp, listOp, height, age;
     string key;
-    Olympian *searchObj;
-    Vector<Olympian *> searchResults;
 
     switch (choice)
     {
         case 1:
-            Olympian *temp;
-            temp = new Olympian;
-            olympianDatabase.insert(temp);
+        {
+        Olympian *temp = new Olympian;
+        olympianDatabase.insert(temp);
 
-            break;
+        break;
+
+        }
 
         case 2:
-            Olympian dataOut;
+        {
+            //Olympian dataOut;
             cout << "Enter name of Olympian for deletion: ";
             cin >> key;
             olympianDatabase.remove(key);
 
             break;
+        }
 
         case 3:
+        {   
             olympianDatabase.undoDelete();
-
             break;
+        }
 
         case 4:
+        {
             searchSubMenu();
 
             cin >> searchOp;
 
             switch (searchOp)
             {
-                case 1:
-                    cout << "Enter name of Olympian: ";
-                    cin >> key;
+            case 1:
+            {
+                cout << "Enter name of Olympian: ";
+                cin >> key;
 
-                    searchObj = olympianDatabase.searchByName(key);
+                Olympian *searchObj = olympianDatabase.searchByName(key);
 
-                    cout << *searchObj;
+                cout << *searchObj;
 
-                    break;
+                break;
+            }
+                
 
-                case 2:
-                    cout << "Enter the age: ";
-                    cin >> age;
+            case 2:
+            {
+                cout << "Enter the age: ";
+                cin >> age;
 
-                    searchResults = olympianDatabase.searchByAge(age);
+                Vector<Olympian*> searchResults;
+                if (olympianDatabase.searchByAge(age, searchResults))
+                {
+                    for (auto oly : searchResults)
+                    {
+                        cout << *oly << endl;
+                    }
+                }
+                else
+                {
+                    cout << "No entries found!\n";
+                }
+                break;
 
-                    //print out results
+            }
+                
+            case 3:
+            {
+                cout << "Enter the height: ";
+                cin >> height;
 
-                    break;
+                Vector<Olympian*> searchResults;
 
-                case 3:
-                    cout << "Enter the height: ";
-                    cin >> height;
-
-                    searchResults = olympianDatabase.searchByHeight(height);
-                    //print out results
-
-                    break;
-
-                default:
-                    std::cout << "\nYou did not enter a valid option. Please enter a number between 1 and 3.\n\n";
+                if (olympianDatabase.searchByHeight(height, searchResults))
+                {
+                    for (auto oly : searchResults)
+                    {
+                        cout << *oly << endl;
+                    }
+                }
+                else
+                {
+                    cout << "No entries found!\n";
+                }
+                break;
+            }
+                
+            default:
+                std::cout << "\nYou did not enter a valid option. Please enter a number between 1 and 3.\n\n";
             }
 
             break;
 
+        } 
         case 5:
+        {
             listSubMenu();
             cin >> listOp;
 
             switch (listOp)
             {
-                case 1:
-                    // print all data from stack
+            case 1:
+                // print all data from stack
 
-                    break;
+                break;
 
-                case 2:
-                    // print all names
+            case 2:
+                // print all names
 
-                    break;
+                break;
 
-                case 3:
-                    olympianDatabase.displayAgeInOrder();
+            case 3:
+                olympianDatabase.displayAgeInOrder();
 
-                    break;
+                break;
 
-                case 4:
-                    olympianDatabase.displayHeightInOrder();
+            case 4:
+                olympianDatabase.displayHeightInOrder();
 
-                    break;
+                break;
 
-                case 5:
-                    cout << "Indented Age Tree:\n";
-                    olympianDatabase.displayAgeTree();
-                    cout << "Indented Height Tree:\n";
-                    olympianDatabase.displayHeightTree();
+            case 5:
+                cout << "Indented Age Tree:\n";
+                olympianDatabase.displayAgeTree();
+                cout << "Indented Height Tree:\n";
+                olympianDatabase.displayHeightTree();
 
-                    break;
+                break;
 
-                case 6: // hidden print option
-                    // Put Aidan's last name here
-                    cout << "\nDeveloped by Aidan, Ashley Cline, Alexander Langley, and Jeff Yang\n\n";
+            case 6: // hidden print option
+                cout << "\nDeveloped by Aidan Sojourner, Ashley Cline, Alexander Langley, and Jeff Yang\n\n";
+                break;
 
-                    break;
-
-                default:
-                    cout << "\nYou did not enter a valid option. please enter an option between 1 and 5.\n\n";
+            default:
+                cout << "\nYou did not enter a valid option. please enter an option between 1 and 5.\n\n";
             }
 
             break;
-
+        }
+  
         case 6:
-            //olympic.saveDatabase();
-
+        {
+            //olympianDatabase.saveDatabase();
             break;
+        }
+
 
         case 7:
+        {
             olympianDatabase.displayHashStats();
-
             break;
+        }
 
         default:
             std::cout << "\nYou did not enter a valid option. Please enter a number between 1 and 8.\n\n";

@@ -14,17 +14,19 @@ class OlympianDatabase {
 private:
     int nRecords;
 
-    HashTable<Olympian*, std::string> *hashTable;
+    HashTable<Olympian*> *hashTable;
     BinarySearchTree<Olympian*> *ageBst;
     BinarySearchTree<Olympian*> *heightBst;
-    Vector<Olympian*> *allRecords;
+
     Stack<Olympian*> *deletionStack;
+    Vector<Olympian*> *allRecords;
 
     bool _buildDatabase(std::ifstream&);
-    Olympian *_readRecord(std::ifstream&);
+    Olympian *_readRecord(std::ifstream&, size_t);
     bool _insert(Olympian*);
     bool _remove(std::string);
 
+    static long _hash(Olympian*, const int);
     static COMPARE_FN cmpName(Olympian *const &, Olympian *const &);
     static COMPARE_FN cmpAge(Olympian *const &, Olympian *const &);
     static COMPARE_FN cmpHeight(Olympian *const &, Olympian *const &);
@@ -41,8 +43,8 @@ public:
     bool remove(std::string);
     bool undoDelete();
     Olympian *searchByName(std::string);
-    Vector<Olympian*> searchByAge(int);
-    Vector<Olympian*> searchByHeight(int);
+    bool searchByAge(int, Vector<Olympian*>&);
+    bool searchByHeight(int, Vector<Olympian*>&);
     Vector<Olympian*> getYoungest();
     Vector<Olympian*> getOldest();
     Vector<Olympian*> getShortest();
