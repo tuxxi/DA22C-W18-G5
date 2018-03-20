@@ -27,7 +27,7 @@ class LinkedList
 private:
     int count;
     ListNode<T> *head;
-    int(*cmp)(const T&, const T&);
+    int (*cmp)(const T&, const T&);
 
 public:
     LinkedList(int(*)(const T&, const T&));
@@ -65,7 +65,7 @@ bool LinkedList<T>::insert(const T &newData)
 {
     ListNode<T> *prev = head, *curr = head->getNext(), *newNode;
 
-    while (curr && cmp(curr->getData(), newData) > 0)
+    while (curr && cmp(curr->getData(), newData) < 0)
     {
         prev = curr;
         curr = curr->getNext();

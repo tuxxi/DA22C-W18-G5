@@ -168,7 +168,6 @@ bool HashTable<T>::_search(T &searchObj)
             if (isFilled[hashVal][i] && !cmp(searchObj, table[hashVal][i]))
             {
                 searchObj = table[hashVal][i];
-
                 return true;
             }
 

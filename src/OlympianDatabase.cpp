@@ -8,32 +8,31 @@ using namespace std;
 static const int BUCKET_SIZE = 3;
 static const int SIZE = 256;
 
-long int hashFunc(Olympian *const &olympian, long int size)
-{
-    long int sum = 0;
-    string name = olympian->getName();
-
-    for (int i = 0; i < name.length(); i++)
-        sum += name[i] * name[i] * name[i];
-
-    return sum % size;
-}
-
-int cmp(Olympian *const &o1, Olympian *const &o2)
-{
-    if (o1->getName() < o2->getName()) return 1;
-    else if (o1->getName() > o2->getName()) return -1;
-    return 0;
-}
 
 OlympianDatabase::OlympianDatabase(ifstream &infile)
 {
-    hashTable = new HashTable<Olympian*>(SIZE, BUCKET_SIZE, hashFunc, cmp);
+    hashTable = new HashTable<Olympian*>(SIZE, BUCKET_SIZE, hashFunc, int_cmpName);
     ageBst = new BinarySearchTree<Olympian*>(cmpAge);
     heightBst = new BinarySearchTree<Olympian*>(cmpHeight);
     allRecords = new Vector<Olympian*>;
     deletionStack = new Stack<Olympian*>;
+    alphabeticalOrderList = new LinkedList<Olympian*>(int_cmpName);
     _buildDatabase(infile);
+}
+
+OlympianDatabase::~OlympianDatabase()
+{
+    delete hashTable;
+    delete ageBst;
+    delete heightBst;
+    delete alphabeticalOrderList;
+
+    delete deletionStack;
+    for (auto entry : *allRecords)
+    {
+        delete entry;
+    }
+    delete allRecords;
 }
 
 bool OlympianDatabase::undoDelete()
@@ -58,17 +57,6 @@ bool OlympianDatabase::undoDelete()
     return false;
 
 }
-
-bool OlympianDatabase::insert(Olympian *newRecord)
-{
-    return _insert(newRecord);
-}
-
-bool OlympianDatabase::remove(string s)
-{
-    return _remove(s);
-}
-
 Olympian *OlympianDatabase::searchByName(string name)
 {
     Olympian o;
@@ -161,12 +149,25 @@ void OlympianDatabase::displayHeightTree()
 
 void OlympianDatabase::displayHashStats()
 {
-
+    cout << "Load Factor: " << hashTable->getLoadFactor() << endl;
+    cout << "# of Collisions: " << hashTable->getnCollisions() << endl;
+    cout << "Total size: " << hashTable->getnFilled() << endl;
+}
+void OlympianDatabase::displayAll()
+{
+    for (auto oly : *allRecords)
+    {
+        printOlympian(oly);
+    }
+}
+void OlympianDatabase::displayAlphabeticalOrder()
+{
+    alphabeticalOrderList->displayList();
 }
 
 void OlympianDatabase::saveDatabase(std::ofstream&)
 {
-
+    //TODO: save to file
 }
 
 bool OlympianDatabase::_buildDatabase(ifstream &infile)
@@ -175,7 +176,7 @@ bool OlympianDatabase::_buildDatabase(ifstream &infile)
 
     size_t lineNum = 1; //skip first line
     while ((newRecord = _readRecord(infile, lineNum++)))
-        _insert(newRecord);
+        insert(newRecord);
     return true;
 }
 
@@ -258,51 +259,62 @@ Olympian *OlympianDatabase::_readRecord(std::ifstream &infile, size_t lineNum)
 
 }
 
-bool OlympianDatabase::_insert(Olympian *newRecord)
+bool OlympianDatabase::insert(Olympian *newRecord)
 {
-    //insert into hash table
-    hashTable->insert(newRecord);
+    //insert into hash table first.
+    if (!hashTable->insert(newRecord)) return false;
 
     bool success = true;
     if (!ageBst->insert(newRecord)) success = false;
     if (!heightBst->insert(newRecord)) success = false;
+    if (!alphabeticalOrderList->insert(newRecord)) success = false;
 
     if (!success)
     {
         ageBst->remove(newRecord);
+        heightBst->remove(newRecord);
         hashTable->remove(newRecord);
+        alphabeticalOrderList->remove(newRecord);
         return false;
     }
 
     return true;
 }
 
-bool OlympianDatabase::_remove(string name)
+bool OlympianDatabase::remove(string name)
 {
     Olympian o;
     auto foundRecord = &o;
-    foundRecord->setName(name);
+    foundRecord->setName(std::move(name));
+    //try to find the record first, and stop if we can't find it
+    if (!hashTable->search(foundRecord)) return false;
 
-    bool success = true;
-    if (!hashTable->remove(foundRecord)) success = false;
-    if (!ageBst->remove(foundRecord)) success = false;
-    if (!heightBst->remove(foundRecord)) success = false;
-
-    if (!success)
+    if (!hashTable->remove(foundRecord))
     {
-        ageBst->insert(foundRecord);
         hashTable->insert(foundRecord);
         return false;
     }
-    //deletionStack->push(foundRecord);
+    if (!ageBst->remove(foundRecord))
+    {
+        ageBst->insert(foundRecord);
+        return false;
+    }
+    if (!heightBst->remove(foundRecord))
+    {
+        heightBst->insert(foundRecord);
+        return false;
+    }
+
+    deletionStack->push(foundRecord);
     return true;
 }
-long OlympianDatabase::_hash(Olympian* object, const int size)
+long int OlympianDatabase::hashFunc(Olympian *const &olympian, long int size)
 {
-    string key = object->getName();
-    int sum = 0;
-    for (int i = 0; i < key.size(); i++)
-        sum += key[i] * key[i] * key[i];
+    long int sum = 0;
+    string name = olympian->getName();
+
+    for (int i = 0; i < name.length(); i++)
+        sum += name[i] * name[i] * name[i];
 
     return sum % size;
 }
@@ -327,22 +339,16 @@ COMPARE_FN OlympianDatabase::cmpHeight(Olympian *const &a, Olympian *const &b)
     if (a->getHeight() > b->getHeight()) return COMPARE_FN::GREATER_THAN;
     return COMPARE_FN::EQUAL_TO;
 }
+int OlympianDatabase::int_cmpName(Olympian *const &a, Olympian *const &b)
+{
+    //this is reversed so the alphabetical order is preserved
+    return int(cmpName(a, b));
+}
 
 void OlympianDatabase::printOlympian(Olympian *&olympian)
 {
-    cout << *olympian << endl;
-}
-
-OlympianDatabase::~OlympianDatabase()
-{
-    delete hashTable;
-    delete ageBst;
-    delete heightBst;
-    delete deletionStack;
-
-    for (auto entry : *allRecords)
-    {
-        delete entry;
-    }
-    delete allRecords;
+    if (olympian)
+        cout << *olympian << endl;
+    else
+        cout << "ERROR! null pointer in database. \n";
 }

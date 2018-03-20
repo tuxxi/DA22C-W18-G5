@@ -17,17 +17,17 @@ private:
     HashTable<Olympian*> *hashTable;
     BinarySearchTree<Olympian*> *ageBst;
     BinarySearchTree<Olympian*> *heightBst;
+    LinkedList<Olympian*> *alphabeticalOrderList;
 
     Stack<Olympian*> *deletionStack;
     Vector<Olympian*> *allRecords;
 
     bool _buildDatabase(std::ifstream&);
     Olympian *_readRecord(std::ifstream&, size_t);
-    bool _insert(Olympian*);
-    bool _remove(std::string);
+    static long hashFunc(Olympian *const &olympian, long int size);
 
-    static long _hash(Olympian*, const int);
     static COMPARE_FN cmpName(Olympian *const &, Olympian *const &);
+    static int int_cmpName(Olympian *const &, Olympian *const &);
     static COMPARE_FN cmpAge(Olympian *const &, Olympian *const &);
     static COMPARE_FN cmpHeight(Olympian *const &, Olympian *const &);
     static void printOlympian(Olympian*&);
@@ -45,12 +45,16 @@ public:
     Olympian *searchByName(std::string);
     bool searchByAge(int, Vector<Olympian*>&);
     bool searchByHeight(int, Vector<Olympian*>&);
+
     Vector<Olympian*> getYoungest();
     Vector<Olympian*> getOldest();
     Vector<Olympian*> getShortest();
     Vector<Olympian*> getTallest();
+
     void displayAgeInOrder();
     void displayHeightInOrder();
+    void displayAll();
+    void displayAlphabeticalOrder();
     void displayAgeTree();
     void displayHeightTree();
     void displayHashStats();
