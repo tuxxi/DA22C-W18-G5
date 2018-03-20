@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/alexanderlangley/Desktop/untitled folder 3/HashTable.h
+LinkedList.h
+/Users/alexanderlangley/Desktop/untitled folder 3/LinkedList.h
+
+/Users/alexanderlangley/Desktop/untitled folder 3/HashTableTest.cpp
+iostream
+-
+fstream
+-
+Olympian.h
+/Users/alexanderlangley/Desktop/untitled folder 3/Olympian.h
+HashTable.h
+/Users/alexanderlangley/Desktop/untitled folder 3/HashTable.h
+
+/Users/alexanderlangley/Desktop/untitled folder 3/LinkedList.h
+iostream
+-
+ListNode.h
+/Users/alexanderlangley/Desktop/untitled folder 3/ListNode.h
+
+/Users/alexanderlangley/Desktop/untitled folder 3/ListNode.h
+
+/Users/alexanderlangley/Desktop/untitled folder 3/Olympian.cpp
+Olympian.h
+/Users/alexanderlangley/Desktop/untitled folder 3/Olympian.h
+
+/Users/alexanderlangley/Desktop/untitled folder 3/Olympian.h
+iostream
+-
+string
+-
+
