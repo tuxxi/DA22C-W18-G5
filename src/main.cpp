@@ -148,11 +148,12 @@ void implementDecision(int choice, OlympianDatabase &olympianDatabase)
             case 1:
             {
                 cout << "Enter name of Olympian: ";
-                cin >> key;
+                cin.ignore();
+                getline(cin, key);
 
                 Olympian *searchObj = olympianDatabase.searchByName(key);
-
-                cout << *searchObj;
+                if (searchObj)
+                    cout << *searchObj;
 
                 break;
             }

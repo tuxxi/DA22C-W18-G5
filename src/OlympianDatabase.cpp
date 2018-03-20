@@ -8,9 +8,27 @@ using namespace std;
 static const int BUCKET_SIZE = 3;
 static const int SIZE = 256;
 
+long int hashFunc(Olympian *const &olympian, long int size)
+{
+    long int sum = 0;
+    string name = olympian->getName();
+
+    for (int i = 0; i < name.length(); i++)
+        sum += name[i] * name[i] * name[i];
+
+    return sum % size;
+}
+
+int cmp(Olympian *const &o1, Olympian *const &o2)
+{
+    if (o1->getName() < o2->getName()) return 1;
+    else if (o1->getName() > o2->getName()) return -1;
+    return 0;
+}
+
 OlympianDatabase::OlympianDatabase(ifstream &infile)
 {
-    hashTable = new HashTable<Olympian*>(cmpName, _hash, SIZE, BUCKET_SIZE);
+    hashTable = new HashTable<Olympian*>(SIZE, BUCKET_SIZE, hashFunc, cmp);
     ageBst = new BinarySearchTree<Olympian*>(cmpAge);
     heightBst = new BinarySearchTree<Olympian*>(cmpHeight);
     allRecords = new Vector<Olympian*>;
@@ -57,7 +75,7 @@ Olympian *OlympianDatabase::searchByName(string name)
     auto foundRecord = &o;
     foundRecord->setName(name);
 
-    if (hashTable->findEntry(foundRecord))
+    if (hashTable->search(foundRecord))
         return foundRecord;
 
     return nullptr;

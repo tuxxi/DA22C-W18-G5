@@ -1,370 +1,238 @@
-//
-//  HashTable.h
-//
-//  Created by YF on 07/03/2018.
-//  Copyright © 2018 YF. All rights reserved.
-//
+#ifndef HASH_TABLE_H
+#define HASH_TABLE_H
 
-#ifndef Hash_h
-#define Hash_h
-
-#include <iostream>
-#include <string>
-#include <iomanip>
 #include "LinkedList.h"
-#include "Stack.h"
-#include "CompareFunction.h"
 
-template<class T>
+#define MAX_COLLISIONS 15
+
+template <class T>
 class HashTable
 {
 private:
-    struct Bucket
-    {
-        T const **data;
+    int tableSize;
+    int bucketSize;
+    int nFilled;
+    int nCollisions;
+    T **table;
+    bool **isFilled;
+    LinkedList<T> *overflowArea;
 
-        bool *empty;
-        int count;
-    };
+    long int(*_hash)(const T&, long int);
+    int(*cmp)(const T&, const T&);
 
-    struct Stats
-    {
-        int curr_size,
-            stats_collision;
-        double LoadFactor;
-        //  friend ostream& operator << (ostream& os, const Stats& rhs);
-    };
+    bool _insert(const T&);
+    bool _insertOverflow(const T&);
+    bool _checkDuplicate(const T&, long int);
+    bool _remove(const T&);
+    bool _search(T&);
+    bool _resize();
+    void _deleteTable(T**, bool**, long int);
 
-    // these are two function pointers
-    COMPARE_FN(*cmp)(const T&, const T&);
-    long(*hash)(const T, const int);
-
-    //a linklist pointer
-    LinkedList<T> *list;
-    Stack<T*> *stack;
-    Stack<Stats> *s_stats;
-
-    //dymically allocate memory for bucket
-    Bucket *bucket;
-    int total_object;
-    int resize;
-    int num_rehash;
-    int SIZE;
-    int size_bucket;
-    double load_factor;
-    int bucket_used;
-    int collision;
-
-    /*
-    the functions below are called by the public functions
-    cannot be accessed by other classes's member functions
-    */
-    bool _insertion(T&, const int address);
-    bool _find(const long address, T &dataOut);
-    bool _remove(const long address, T &dataOut);
 public:
-    /*
-    public functions
-    */
-    HashTable(COMPARE_FN(*cmp)(const T&, const T&), long(*hash)(const T, const int), int SIZE, int size_bucket);
+    HashTable(long int, int, long int(*)(const T&, long int), int(*)(const T&, const T&));
 
     ~HashTable();
-    bool insert(T data);
-    bool findEntry(T &dataOut);
-    bool remove(T &dataOut);
-    bool rehash();
-    void printStats();
 
+    long int getTableSize() { return tableSize; }
+    int getnFilled() { return nFilled; }
+    int getnCollisions() { return nCollisions; }
+    double getLoadFactor() { return nFilled / tableSize; }
+
+    bool insert(const T&);
+    bool remove(const T&);
+    bool search(T&);
 };
 
-
-/*
-dynamical allocation for each pointer in the buckets.
-set empty to true, which indicates that this spot has not been taken
-it takes two function pointers, the first one is comparing function (compare the key and the object)
-the second funciton is the hasing function
-*/
-template<class T>
-HashTable<T>::HashTable(COMPARE_FN(*cmp)(const T&, const T&), long(*hash)(const T, const int), int SIZE, int size_bucket)
+template <class T>
+HashTable<T>::HashTable(long int tableSize, int bucketSize,
+    long int(*hash)(const T&, long int), int(*cmp)(const T&, const T&))
 {
-    this->SIZE = SIZE;        //initial size
-    this->size_bucket = size_bucket;
-    this->resize = SIZE;
-    this->total_object = 0;
-    this->bucket_used = 0;
-    this->load_factor = 0;
-    this->num_rehash = 0;
-    this->collision = 0;
-
+    this->tableSize = tableSize;
+    this->bucketSize = bucketSize;
+    this->nFilled = 0;
+    this->nCollisions = 0;
+    this->table = new T*[tableSize] {nullptr};
+    this->isFilled = new bool*[tableSize] {nullptr};
+    this->overflowArea = new LinkedList<T>(cmp);
+    this->_hash = hash;
     this->cmp = cmp;
-    this->hash = hash;
-    list = new LinkedList<T>(this->cmp);
-    stack = new Stack<T*>;
-    s_stats = new Stack<Stats>;
+}
 
-    bucket = new Bucket[resize];
+template <class T>
+bool HashTable<T>::insert(const T &newData)
+{
+    return _insert(newData);
+}
 
-    for (int i = 0; i<resize; i++)
+template <class T>
+bool HashTable<T>::remove(const T &removalKey)
+{
+    return (_remove(removalKey) || overflowArea->insert(removalKey));
+}
+
+template <class T>
+bool HashTable<T>::search(T &searchObj)
+{
+    return (_search(searchObj) || overflowArea->search(searchObj));
+}
+
+template <class T>
+bool HashTable<T>::_insert(const T &newData)
+{
+    long int hashVal = _hash(newData, tableSize);
+
+    if (table[hashVal])
     {
-        bucket[i].count = 0;
-        bucket[i].data = new const T*[size_bucket];
-        bucket[i].empty = new bool[size_bucket];
-
-        for (int j = 0; j<size_bucket; j++)
+        if (!_checkDuplicate(newData, hashVal))
         {
-            bucket[i].data[j] = new T;
-            bucket[i].data[j] = nullptr;
-            bucket[i].empty[j] = true;
+            for (int i = 0; i < bucketSize; i++)
+                if (!isFilled[hashVal][i])
+                {
+                    table[hashVal][i] = newData;
+                    isFilled[hashVal][i] = true;
+                    nCollisions++;
+
+                    return true;
+                }
+
+            if (!_insertOverflow(newData))
+                return false;
         }
     }
-}
-
-/*
-the first parameter the the key which can get the index of the bucket
-*/
-
-template<class T>
-bool HashTable<T>::insert(T data)
-{
-    T *hold = nullptr;
-    hold = &data;
-    this->total_object++;
-
-    long address = hash(data, this->resize);
-
-    // cout<<address<<endl;
-
-    stack->push(hold);
-
-    bool success;
-    success = _insertion(data, (int)address);
-
-    if (!success)
-        list->insert_overflow(data);
-
-    load_factor = double(bucket_used) / resize;
-
-    //   std::cout<<load_factor<<" "<<bucket_used<<" "<<resize<<" "<<std::endl;
-
-    if (load_factor >= 0.6)
+    else
     {
-        this->collision = this->total_object - this->bucket_used;
-        this->num_rehash++;
+        table[hashVal] = new T[bucketSize]{ T() };
+        isFilled[hashVal] = new bool[bucketSize] {false};
+        table[hashVal][0] = newData;
+        isFilled[hashVal][0] = true;
 
-        Stats stats;
-        stats.stats_collision = this->collision;
-        stats.curr_size = this->resize;
-        stats.LoadFactor = this->load_factor;
+        nFilled++;
 
-        s_stats->push(stats);
-
-        rehash();
-
-
+        return true;
     }
 
-
-    return success;
+    return false;
 }
 
-/*takes the key and find the object
-return true if the item is found
-*/
-template<class T>
-bool HashTable<T>::findEntry(T &dataOut)
+template <class T>
+bool HashTable<T>::_insertOverflow(const T &newData)
 {
-    long address = hash(dataOut, resize);
-    bool success = _find(address, dataOut);
-
-    if (!success)
-        success = list->search_overflow(dataOut);
-
-    return success;
-}
-
-/*
-try to remove the object from the hashtable
-return true if the deletion is successful
-*/
-template<class T>
-bool HashTable<T>::remove(T &dataOut)
-{
-    long address = hash(dataOut, resize);
-
-    bool success;
-    success = _remove(address, dataOut);
-
-    if (!success)
-        success = list->remove_overflow(dataOut);
-
-    return success;
-}
-
-
-/*
-this is a private function, which is accessed by insert function
-add a new item in the hashtable if that bucket still has vacant place
-*/
-template<class T>
-bool HashTable<T>::_insertion(T &data, const int address)
-{
-    for (int i = 0; i<size_bucket; i++)
+    if (overflowArea->insert(newData))
     {
-        if (bucket[address].empty[i] == true)
-        {
-            //  std::cout<< i <<"    ";       //debug
-            bucket[address].empty[i] = false;
-            bucket[address].data[i] = &data;
+        nCollisions++;
 
-            if (bucket[address].data[i] != nullptr)      // debug
-                                                         // std::cout<<"good!\n";
+        /*if (overflowArea->getCount() >= MAX_COLLISIONS)
+        _resize();*/
 
-                if (i == 0)
-                    bucket_used++;
+        return true;
+    }
 
-            bucket[address].count++;
-            //   cout<<*bucket[address].data[i]<<endl;
+    return false;
+}
+
+template <class T>
+bool HashTable<T>::_checkDuplicate(const T &newData, long int hashVal)
+{
+    for (int i = 0; i < bucketSize; i++)
+        if (isFilled[hashVal][i] && !cmp(newData, table[hashVal][i]))
             return true;
-        }
-    }
+
     return false;
 }
 
-/*
-this is a private function, which is accessed by delete function
-remove the item if the item is found in the hashtable
-*/
-template<class T>
-bool HashTable<T>::_remove(const long address, T &dataOut)
+template <class T>
+bool HashTable<T>::_remove(const T &removalKey)
 {
+    long int hashVal = _hash(removalKey, tableSize);
 
-    for (int i = 0; i<size_bucket; i++)
-    {
-        if (bucket[address].empty[i] == false)
-        {
-            // cout<<"_remove"<<**bucket[address].data[0]<<endl;
-            //   std::cout<<dataOut<<std::endl;       //debug
-
-            if (cmp(*bucket[address].data[i], dataOut) == COMPARE_FN::EQUAL_TO)
+    if (table[hashVal])
+        for (int i = 0; i < bucketSize; i++)
+            if (isFilled[hashVal][i] && !cmp(table[hashVal][i], removalKey))
             {
-                //  cout<<key<<endl;       //debug
-                dataOut = *bucket[address].data[i];
-                bucket[address].empty[i] = true;
-                bucket[address].data[i] = nullptr;
-                bucket[address].count--;
+                isFilled[hashVal][i] = false;
+                table[hashVal][i] = T();
+
                 return true;
             }
-        }
-    }
+
     return false;
 }
 
-/*
-this is a private function, which is accessed by _find function
-return true if the item is found in the hashtable
-*/
-
-template<class T>
-bool HashTable<T>::_find(const long address, T &dataOut)
+template <class T>
+bool HashTable<T>::_search(T &searchObj)
 {
-    // cout<<"_find"<<address<<endl;
-    for (int i = 0; i<size_bucket; i++)
-    {
-        if (bucket[address].empty[i] == false)
-        {
-            if (cmp(*bucket[address].data[i], dataOut) == COMPARE_FN::EQUAL_TO)
+    long int hashVal = _hash(searchObj, tableSize);
+
+    if (table[hashVal])
+        for (int i = 0; i < bucketSize; i++)
+            if (isFilled[hashVal][i] && !cmp(searchObj, table[hashVal][i]))
             {
-                // std::cout<<"found!\n";
-                dataOut = *bucket[address].data[i];
+                searchObj = table[hashVal][i];
+
                 return true;
             }
-        }
-    }
 
     return false;
 }
 
-
-template<class T>
-bool HashTable<T>::rehash()
+template <class T>
+bool HashTable<T>::_resize()
 {
-    /*
-    int index = 0;
-    T* In = new T[stack->getCount()];
+    T **oldTable = table, **ptr1;
+    bool **oldIsFilled = isFilled, **ptr2;
 
-    while (!stack->isEmpty())
-    {
-        //In[index] = nullptr;
-        stack->pop(In[index]);
-        index++;
-    }
+    table = new T*[tableSize * 2];
+    isFilled = new bool*[tableSize * 2];
 
-    for (int i = 0; i<resize; i++)
-    {
-        delete[] bucket[i].data;
-    }
+    for (int i = 0; i < tableSize; i++)
+        if (oldTable[i])
+            for (int j = 0; j < bucketSize; j++)
+                if (oldIsFilled[i][j])
+                    if (!_insert(oldTable[i][j]) && !_insertOverflow(oldTable[i][j]))
+                    {
+                        std::cerr << "\n[ERROR]: There was a problem resizing the hash table.\n\n";
 
-    delete[] bucket;
+                        _deleteTable(table, isFilled, tableSize * 2);
 
-    resize *= 3;
+                        table = oldTable;
+                        isFilled = oldIsFilled;
 
-    bucket = new Bucket[resize];
-    this->bucket_used = 0;
-    this->load_factor = 0;
+                        return false;
+                    }
 
-    for (int i = 0; i<resize; i++)
-    {
-        bucket[i].count = 0;
-        bucket[i].data = new const T*[size_bucket];
-        bucket[i].empty = new bool[size_bucket];
+    _deleteTable(oldTable, oldIsFilled, tableSize);
+    tableSize *= 2;
 
-        for (int j = 0; j<size_bucket; j++)
-        {
-            bucket[i].data[j] = new T;
-            bucket[i].data[j] = nullptr;
-            bucket[i].empty[j] = true;
-        }
-    }
-
-    for (int i = 0; i<index; i++)
-        insert(**In[i]);
-
-    delete[] In;
     return true;
-    */
-    return false;
 }
 
-
-template<class T>
-void HashTable<T>::printStats()
+template <class T>
+void HashTable<T>::_deleteTable(T **table, bool **isFilled, long int tableSize)
 {
-    Stats dataOut;
+    T **ptr1 = table;
+    bool **ptr2 = isFilled;
 
-    cout << left << setw(15) << "Current_SIZE" << left << setw(15) << "Collisions" << left << setw(15)
-        << "Load_factor" << endl;
-    while (!s_stats->isEmpty())
+    while (ptr1 < table + tableSize)
     {
-        s_stats->pop(dataOut);
-        cout << left << setw(15) << dataOut.curr_size << left << setw(15) << dataOut.stats_collision << left << setw(15)
-            << dataOut.LoadFactor << endl;
+        if (*ptr1)
+        {
+            delete *ptr1;
+            delete *ptr2;
+        }
+
+        ptr1++;
+        ptr2++;
     }
 }
 
-/*
-release all the memory has been dymically allocated
-*/
-
-template<class T>
+template <class T>
 HashTable<T>::~HashTable()
 {
-    for (int i = 0; i<SIZE; i++)
-    {
-        delete[] bucket[i].data;
-    }
-    delete[] bucket;
+    std::cout << overflowArea->getCount() << std::endl;
+    T **ptr1 = table;
+    bool **ptr2 = isFilled;
 
+    _deleteTable(table, isFilled, tableSize);
 }
 
-
-#endif /* Hash_h */
+#endif // HASH_TABLE_H

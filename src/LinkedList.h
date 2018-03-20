@@ -1,129 +1,135 @@
-#ifndef TEAM_PROJECT_LINKEDLIST
-#define TEAM_PROJECT_LINKEDLIST
-#include "CompareFunction.h"
+#ifndef LINKED_LIST_H
+#define LINKED_LIST_H
+
+#include <iostream>
+
 template <class T>
-class LinkedList {
+class ListNode
+{
 private:
-    COMPARE_FN(*cmp)(const T&, const T&);
-
-    struct ListNode {
-        T const *data;
-        ListNode *next;
-    };
-
-    ListNode *head;
+    ListNode * next;
+    T data;
 
 public:
-    LinkedList(COMPARE_FN(*cmp)(const T&, const T&));
-    ~LinkedList();
-    bool insert_overflow(const T&);
-    bool remove_overflow(T &dataOut);
-    bool search_overflow(T &dataOut);
+    ListNode() { data = T(), next = nullptr; }
+    ListNode(const T &data) { this->data = data; next = nullptr; };
+
+    ListNode *getNext() { return next; }
+    T getData() { return data; }
+
+    void setNext(ListNode *next) { this->next = next; }
+    void setData(T data) { this->data = data; }
 };
 
 template <class T>
-LinkedList<T>::LinkedList(COMPARE_FN(*cmp)(const T&, const T&))
+class LinkedList
 {
-    head = new ListNode;
-    head = nullptr;
+private:
+    int count;
+    ListNode<T> *head;
+    int(*cmp)(const T&, const T&);
+
+public:
+    LinkedList(int(*)(const T&, const T&));
+
+    ~LinkedList();
+
+    int getCount() { return count; }
+    void displayList();
+    bool insert(const T&);
+    bool remove(const T&);
+    bool search(T&);
+};
+
+template <class T>
+LinkedList<T>::LinkedList(int(*cmp)(const T&, const T&))
+{
+    this->head = new ListNode<T>;
     this->cmp = cmp;
+}
+
+template <class T>
+void LinkedList<T>::displayList()
+{
+    ListNode<T> *nodePtr = head->getNext();
+
+    while (nodePtr)
+    {
+        std::cout << *nodePtr->getData() << std::endl;
+        nodePtr = nodePtr->getNext();
+    }
+}
+
+template <class T>
+bool LinkedList<T>::insert(const T &newData)
+{
+    ListNode<T> *prev = head, *curr = head->getNext(), *newNode;
+
+    while (curr && cmp(curr->getData(), newData) > 0)
+    {
+        prev = curr;
+        curr = curr->getNext();
+    }
+
+    if (curr && !cmp(curr->getData(), newData))
+        return false;
+
+    newNode = new ListNode<T>(newData);
+    prev->setNext(newNode);
+    newNode->setNext(curr);
+    count++;
+
+    return true;
+}
+
+template <class T>
+bool LinkedList<T>::remove(const T &removalKey)
+{
+    ListNode<T> *prev = head, *curr = head->getNext();
+
+    while (curr && cmp(curr->getData(), removalKey) > 0)
+    {
+        prev = curr;
+        curr = curr->getNext();
+    }
+
+    if (!curr || cmp(curr->getData(), removalKey))
+        return false;
+
+    prev->setNext(curr->getNext());
+    delete curr;
+    count--;
+
+    return true;
+}
+
+template <class T>
+bool LinkedList<T>::search(T &searchKey)
+{
+    ListNode<T> *curr = head->getNext();
+
+    while (curr && cmp(curr->getData(), searchKey) > 0)
+        curr = curr->getNext();
+
+    if (!curr || cmp(curr->getData(), searchKey))
+        return false;
+    std::cout << curr->getData() << std::endl;
+    searchKey = curr->getData();
+
+    return true;
 }
 
 template <class T>
 LinkedList<T>::~LinkedList()
 {
-    ListNode *curr = head, *prev;
+    ListNode<T> *prev, *curr = head;
 
     while (curr)
     {
         prev = curr;
-        curr = curr->next;
+        curr = curr->getNext();
         delete prev;
     }
 }
 
-template <class T>
-bool LinkedList<T>::insert_overflow(const T &newRecord)
-{
-    ListNode *newNode;
-    newNode = new ListNode;
-    newNode->data = &newRecord;
-    newNode->next = nullptr;
-
-    if (head == nullptr)
-        head = newNode;
-
-    else
-    {
-        ListNode *curr = head;
-        while (curr->next)
-            curr = curr->next;
-
-        curr->next = newNode;
-    }
-
-    return true;
-}
-
-
-
-template <class T>
-bool LinkedList<T>::remove_overflow(T &dataOut)
-{
-    ListNode *curr, *prev;
-
-    if (head == nullptr)
-        return false;
-
-    curr = head;
-    if (cmp(*curr->data, dataOut) == COMPARE_FN::EQUAL_TO)
-    {
-        dataOut = *curr->data;
-        head = curr->next;
-        delete curr;
-
-        return true;
-    }
-
-    prev = head;
-    curr = head->next;
-
-    while (curr && !(cmp(*curr->data, dataOut) == COMPARE_FN::EQUAL_TO))
-    {
-        prev = curr;
-        curr = curr->next;
-    }
-
-    if (curr && cmp(*curr->data, dataOut) == COMPARE_FN::EQUAL_TO)
-    {
-        dataOut = *curr->data;
-        prev->next = curr->next;
-        curr->data = nullptr;
-        delete curr;
-
-        return true;
-    }
-
-    return false;
-}
-
-template <class T>
-bool LinkedList<T>::search_overflow(T &dataOut)
-{
-    ListNode *nodePtr = head;
-
-    while (nodePtr)
-    {
-        if (cmp(*nodePtr->data, dataOut) == COMPARE_FN::EQUAL_TO)
-        {
-            dataOut = *nodePtr->data;
-            return true;
-        }
-        nodePtr = nodePtr->next;
-    }
-
-    return false;
-}
-
-
-#endif //TEAM_PROJECT_LINKEDLIST_H
+#endif
