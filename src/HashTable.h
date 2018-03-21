@@ -11,10 +11,11 @@ class HashTable
 private:
     int tableSize;
     int bucketSize;
-    int nFilled;
+    int tableSpacesFilled;
     int nCollisions;
     T **table;
     bool **isFilled;
+    int *nFilled;
     LinkedList<T> *overflowArea;
 
     long int(*_hash)(const T&, long int);
@@ -34,9 +35,9 @@ public:
     ~HashTable();
 
     long int getTableSize() { return tableSize; }
-    int getnFilled() { return nFilled; }
+    int getnFilled() { return tableSpacesFilled; }
     int getnCollisions() { return nCollisions; }
-    double getLoadFactor() { return nFilled / tableSize; }
+    double getLoadFactor() { return tableSpacesFilled / tableSize; }
 
     bool insert(const T&);
     bool remove(const T&);
@@ -49,10 +50,11 @@ HashTable<T>::HashTable(long int tableSize, int bucketSize,
 {
     this->tableSize = tableSize;
     this->bucketSize = bucketSize;
-    this->nFilled = 0;
+    this->tableSpacesFilled = 0;
     this->nCollisions = 0;
     this->table = new T*[tableSize] {nullptr};
     this->isFilled = new bool*[tableSize] {nullptr};
+    this->nFilled = new int[tableSize] {0};
     this->overflowArea = new LinkedList<T>(cmp);
     this->_hash = hash;
     this->cmp = cmp;
@@ -80,23 +82,27 @@ template <class T>
 bool HashTable<T>::_insert(const T &newData)
 {
     long int hashVal = _hash(newData, tableSize);
+    T searchObj;
 
     if (table[hashVal])
     {
-        if (!_checkDuplicate(newData, hashVal))
+        if (!_checkDuplicate(newData, hashVal) && !overflowArea->search((searchObj = newData)))
         {
-            for (int i = 0; i < bucketSize; i++)
-                if (!isFilled[hashVal][i])
-                {
-                    table[hashVal][i] = newData;
-                    isFilled[hashVal][i] = true;
-                    nCollisions++;
+            if (nFilled[hashVal] < bucketSize)
+            {
+                for (int i = 0; i < bucketSize; i++)
+                    if (!isFilled[hashVal][i])
+                    {
+                        table[hashVal][i] = newData;
+                        isFilled[hashVal][i] = true;
+                        nFilled[hashVal]++;
+                        nCollisions++;
 
-                    return true;
-                }
-
-            if (!_insertOverflow(newData))
-                return false;
+                        return true;
+                    }
+            }
+            else
+                return (_insertOverflow(newData));
         }
     }
     else
@@ -105,8 +111,8 @@ bool HashTable<T>::_insert(const T &newData)
         isFilled[hashVal] = new bool[bucketSize] {false};
         table[hashVal][0] = newData;
         isFilled[hashVal][0] = true;
-
-        nFilled++;
+        nFilled[hashVal]++;
+        tableSpacesFilled++;
 
         return true;
     }
@@ -149,8 +155,16 @@ bool HashTable<T>::_remove(const T &removalKey)
         for (int i = 0; i < bucketSize; i++)
             if (isFilled[hashVal][i] && !cmp(table[hashVal][i], removalKey))
             {
-                isFilled[hashVal][i] = false;
                 table[hashVal][i] = T();
+                isFilled[hashVal][i] = false;
+                nFilled[hashVal]--;
+                tableSpacesFilled--;
+
+                if (!nFilled[hashVal])
+                {
+                    delete table[hashVal];
+                    table[hashVal] = nullptr;
+                }
 
                 return true;
             }
@@ -177,8 +191,8 @@ bool HashTable<T>::_search(T &searchObj)
 template <class T>
 bool HashTable<T>::_resize()
 {
-    T **oldTable = table, **ptr1;
-    bool **oldIsFilled = isFilled, **ptr2;
+    T **oldTable = table;
+    bool **oldIsFilled = isFilled;
 
     table = new T*[tableSize * 2];
     isFilled = new bool*[tableSize * 2];
@@ -227,7 +241,6 @@ void HashTable<T>::_deleteTable(T **table, bool **isFilled, long int tableSize)
 template <class T>
 HashTable<T>::~HashTable()
 {
-    std::cout << overflowArea->getCount() << std::endl;
     T **ptr1 = table;
     bool **ptr2 = isFilled;
 

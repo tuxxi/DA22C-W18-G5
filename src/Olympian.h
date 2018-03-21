@@ -42,6 +42,7 @@ public:
     int getnBronze() const { return nBronze; }
 
     friend std::ostream &operator<<(std::ostream&, const Olympian&);
+    friend std::ostream &operator<<(std::ostream&, Olympian *const &);
 
 private:
     std::string name;
@@ -66,6 +67,21 @@ inline std::ostream &operator<<(std::ostream &os, const Olympian &olympian)
     os << "Number Gold Medals: " << olympian.nGold << std::endl;
     os << "Number Silver Medals: " << olympian.nSilver << std::endl;
     os << "Number Bronze Medals: " << olympian.nBronze << std::endl;
+
+    return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, Olympian *const &olympian)
+{
+    os << "Name: " << olympian->name << std::endl;
+    os << "Age: " << olympian->age << std::endl;
+    os << "Gender: " << olympian->gender << std::endl;
+    os << "Height: " << olympian->height << std::endl;
+    os << "State: " << olympian->state << std::endl;
+    os << "Sport: " << olympian->sport << std::endl;
+    os << "Number Gold Medals: " << olympian->nGold << std::endl;
+    os << "Number Silver Medals: " << olympian->nSilver << std::endl;
+    os << "Number Bronze Medals: " << olympian->nBronze << std::endl;
 
     return os;
 }

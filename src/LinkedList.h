@@ -113,7 +113,7 @@ bool LinkedList<T>::search(T &searchKey)
 
     if (!curr || cmp(curr->getData(), searchKey))
         return false;
-    std::cout << curr->getData() << std::endl;
+
     searchKey = curr->getData();
 
     return true;
