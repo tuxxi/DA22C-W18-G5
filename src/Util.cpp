@@ -2,6 +2,8 @@
 // Created by tuxxi on 3/20/18.
 //
 #include "Util.h"
+#include <cmath>
+
 using namespace Util;
 
 PrimeNumbers::PrimeNumbers() noexcept
@@ -50,7 +52,7 @@ void PrimeNumbers::CreatePrimes()
 
     // In general Sieve of Sundaram, produces primes
     // smaller than (2*x + 2) for a given number x
-    constexpr auto nNew = int(sqrt(n));
+    constexpr auto nNew = int(ct_sqrt(n));
 
     // This array is used to separate numbers of the
     // form i+j+2ij from others where  1 <= i <= j

@@ -11,7 +11,7 @@ public:
     virtual ~Vector();
 
     T& operator[](size_t idx);
-    T& at(size_t idx) throw(std::runtime_error);
+    T& at(size_t idx) throw(...);
 
     void add(const T& item);
     bool reserve(size_t size);
@@ -108,7 +108,7 @@ T& Vector<T>::operator[](size_t idx)
 }
 
 template<class T>
-T& Vector<T>::at(size_t idx) throw(std::runtime_error)
+T& Vector<T>::at(size_t idx) throw(...)
 {
     if (idx < m_count)
     {

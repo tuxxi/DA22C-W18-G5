@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.9)
 project(DA22C_W18_G5)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #comment this out to only compile the project with no gui.
 #otherwise we're gonna be makin a sick gui so you'd better have Qt 5 installed
@@ -26,10 +27,10 @@ set(PROJECT_SRCS
         src/tests/BSTTest.h src/tests/VectorTest.h src/tests/HashTableTest.h
         src/tests/Tests.cpp
         src/Util.h src/Util.cpp
-        src/main.cpp)
+        )
 
 #normal executable
-add_executable(DA22C_W18_G5 ${PROJECT_SRCS})
+add_executable(DA22C_W18_G5 ${PROJECT_SRCS} src/main.cpp)
 
 
 if (QT_GUI)

@@ -173,8 +173,6 @@ void OlympianDatabase::saveDatabase(std::ofstream&)
 
 bool OlympianDatabase::_buildDatabase(ifstream &infile)
 {
-    Olympian *newRecord;
-
     size_t lineNum = 1; //skip first line
     //read all entries into vector
     while (_readRecord(infile, lineNum++)) {}
