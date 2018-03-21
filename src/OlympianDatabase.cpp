@@ -32,12 +32,11 @@ OlympianDatabase::~OlympianDatabase()
     delete ageBst;
     delete heightBst;
     delete alphabeticalOrderList;
-
     delete deletionStack;
+
     for (auto entry : *allRecords)
-    {
         delete entry;
-    }
+
     delete allRecords;
 }
 
@@ -195,7 +194,9 @@ bool OlympianDatabase::saveDatabase(std::string outfileName)
 bool OlympianDatabase::_buildDatabase(ifstream &infile)
 {
     while (auto newRecord = _readRecord(infile))
-        insert(newRecord);
+        if (insert(newRecord))
+            allRecords->add(newRecord);
+
     return true;
 }
 
@@ -260,7 +261,6 @@ bool OlympianDatabase::insert(Olympian *newEntry)
         return false;
     }
 
-    allRecords->add(newEntry);
     nRecords++;
 
     return true;
