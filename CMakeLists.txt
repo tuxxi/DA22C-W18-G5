@@ -56,13 +56,15 @@ if (QT_GUI)
     #append extra gui-specific source files
     list(APPEND PROJECT_SRCS
         src/gui/main.cpp
+        src/gui/mainwindow.hpp src/gui/mainwindow.cpp
+        src/gui/olympianmodel.hpp src/gui/olympianmodel.cpp
     )
     add_executable(DA22C_W18_G5_GUI ${GUI_TYPE} ${PROJECT_SRCS})
 
     #set target link libraries
-    target_link_libraries(DA22C_W18_G5_GUI
+    target_link_libraries(DA22C_W18_G5_GUI 
         Qt5::Widgets
-		Qt5::Core
+		Qt5::Core 
 		Qt5::Gui)
 endif()
 

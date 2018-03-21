@@ -11,7 +11,8 @@
 #include "HashTable.h"
 
 class OlympianDatabase {
-private:
+
+protected:
     int nRecords;
 
     HashTable<Olympian*> *hashTable;
@@ -35,7 +36,7 @@ public:
     explicit OlympianDatabase(std::ifstream&);
     ~OlympianDatabase();
 
-    int getnRecords() { return nRecords; }
+    int getnRecords() const { return nRecords; }
 
     bool insert(Olympian*);
     bool remove(std::string);

@@ -39,6 +39,8 @@ public:
     bool insert(const T&);
     bool remove(const T&);
     bool search(T&);
+
+    void insertToVector(Vector<T>& v);
 };
 
 template <class T>
@@ -119,6 +121,18 @@ bool LinkedList<T>::search(T &searchKey)
     searchKey = curr->getData();
 
     return true;
+}
+
+template <class T>
+void LinkedList<T>::insertToVector(Vector<T>& v)
+{
+    ListNode<T> *nodePtr = head->getNext();
+
+    while (nodePtr)
+    {
+        v.add(nodePtr->getData());
+        nodePtr = nodePtr->getNext();
+    }
 }
 
 template <class T>

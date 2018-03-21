@@ -176,7 +176,10 @@ bool OlympianDatabase::saveDatabase(std::string outfileName)
     ofstream outfile(outfileName);
 
     if (!outfile)
+    {
         cerr << "\nError saving database. The file " << outfileName << " could not be opened\n";
+        return false;
+    }
 
     for (auto item : *allRecords)
         outfile << item->getName() << "," << item->getSport() << "," << item->getState() << ","
@@ -184,6 +187,7 @@ bool OlympianDatabase::saveDatabase(std::string outfileName)
                 << item->getnGold() << "," << "," << item->getnSilver() << "," << item->getnBronze() << endl;
 
     outfile.close();
+    return true;
 }
 
 bool OlympianDatabase::_buildDatabase(ifstream &infile)
@@ -241,13 +245,10 @@ Olympian *OlympianDatabase::_readRecord(std::ifstream &infile)
 
 
 #ifdef _DEBUG
-        cout << lastName + ", " << firstName << ": " << gender << "; " << sport << "; "<< height << ", " << age << "; " << state << endl;
+        cout << name << ": " << gender << "; " << sport << "; "<< height << ", " << age << "; " << state << endl;
 #endif
 
         auto newEntry = new Olympian(name, sport, state, gender[0], age, height, nGold, nSilver, nBronze);
-        //allRecords->add(newEntry);
-        //nRecords++;
-
         return newEntry;
     }
 

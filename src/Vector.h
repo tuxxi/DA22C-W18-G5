@@ -10,8 +10,8 @@ public:
     Vector();
     virtual ~Vector();
 
-    T& operator[](size_t idx);
-    T& at(size_t idx) throw();
+    T& operator[](size_t idx) const;
+    T& at(size_t idx) const throw();
 
     void add(const T& item);
     bool reserve(size_t size);
@@ -27,6 +27,7 @@ public:
     T* end() { return m_array + m_count; }
     T* rend() { return m_array - 1; }
 private:
+    void clearData();
     static const size_t DEFAULT_SIZE = 8;
     size_t m_count;
     size_t m_arraySize;
@@ -43,7 +44,7 @@ Vector<T>::Vector()
 template<class T>
 Vector<T>::~Vector()
 {
-    clear();
+    clearData();
 }
 
 template<class T>
@@ -95,20 +96,18 @@ bool Vector<T>::remove(size_t idx)
 template<class T>
 void Vector<T>::clear()
 {
-    delete[] m_array;
-    m_array = nullptr;
-    m_arraySize = 0;
-    m_count = 0;
+    clearData();
+    reserve(DEFAULT_SIZE);
 }
 
 template<class T>
-T& Vector<T>::operator[](size_t idx)
+T& Vector<T>::operator[](size_t idx) const
 {
     return at(idx);
 }
 
 template<class T>
-T& Vector<T>::at(size_t idx) throw()
+T& Vector<T>::at(size_t idx) const throw()
 {
     if (idx < m_count)
     {
@@ -123,6 +122,15 @@ template<class T>
 bool Vector<T>::empty() const
 {
     return m_count == 0;
+}
+
+template <class T>
+void Vector<T>::clearData()
+{
+    delete[] m_array;
+    m_array = nullptr;
+    m_arraySize = 0;
+    m_count = 0;
 }
 
 template<class T>

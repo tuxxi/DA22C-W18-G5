@@ -1,7 +1,6 @@
 #include <QApplication>
 
-#include <QMainWindow>
-
+#include "mainwindow.hpp"
 #define QT_AUTO_SCREEN_SCALE_FACTOR 1
 
 int main(int argc, char *argv[])
@@ -11,7 +10,7 @@ int main(int argc, char *argv[])
 #endif
 
     QApplication app(argc, argv);
-    QMainWindow w;
+    MainWindow w;
     w.show();
     return app.exec();
 }

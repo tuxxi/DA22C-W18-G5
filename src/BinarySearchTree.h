@@ -44,6 +44,7 @@ public:
     // find the largest node
     T& findLargest() const;
 
+    void insertInorder(Vector<T>& v);
 private:
     struct BinaryNode
     {
@@ -91,6 +92,7 @@ private:
     void _inorder(void visit(T &), node* nodePtr) const;
     void _postorder(void visit(T &), node* nodePtr) const;
 
+    void _insert_inorder(node* nodePtr, Vector<T>& v);
     //indented list traverse
     void _print(node* nodePtr, std::ostream& stream, int indentLevel) const;
 };
@@ -160,6 +162,14 @@ T& BinarySearchTree<T>::findLargest() const
 {
     return _largest(this->rootPtr);
 }
+
+template <class T>
+void BinarySearchTree<T>::insertInorder(Vector<T>& v)
+{
+    _insert_inorder(this->rootPtr, v);
+}
+
+
 //operator<< for ostream
 template<class T>
 std::ostream &operator<<(std::ostream &stream, const BinarySearchTree<T> &other)
@@ -412,6 +422,19 @@ void BinarySearchTree<T>::_postorder(void visit(T &), node* nodePtr) const
         visit(item);
     }
 }
+
+template <class T>
+void BinarySearchTree<T>::_insert_inorder(node* nodePtr, Vector<T>& v)
+{
+    if (nodePtr)
+    {
+        _insert_inorder(nodePtr->leftPtr, v);
+        v.add(nodePtr->item);
+        _insert_inorder(nodePtr->rightPtr, v);
+    }
+
+}
+
 //internal recursive print function that outputs to std::ostream
 template<class T>
 void BinarySearchTree<T>::_print(node *nodePtr, std::ostream &stream, int indentLevel) const
