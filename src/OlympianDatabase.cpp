@@ -306,22 +306,18 @@ bool OlympianDatabase::remove(string name)
     //try to find the record first, and stop if we can't find it
     if (!hashTable->search(foundRecord)) return false;
 
-    if (!hashTable->remove(foundRecord))
-    {
-        hashTable->insert(foundRecord);
-        return false;
-    }
-    if (!ageBst->remove(foundRecord))
-    {
-        ageBst->insert(foundRecord);
-        return false;
-    }
-    if (!heightBst->remove(foundRecord))
-    {
-        heightBst->insert(foundRecord);
-        return false;
-    }
+    bool success = true;
+    if (!hashTable->remove(foundRecord)) success = false;
+    if (!ageBst->remove(foundRecord)) success = false;
+    if (!heightBst->remove(foundRecord)) success = false;
+    if (!alphabeticalOrderList->remove(foundRecord)) success = false;
 
+    if (!success)
+    {
+        //re insert
+        insert(foundRecord);
+        return false;
+    }
     deletionStack->push(foundRecord);
     return true;
 }

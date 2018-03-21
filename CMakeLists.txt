@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 #comment this out to only compile the project with no gui.
 #otherwise we're gonna be makin a sick gui so you'd better have Qt 5 installed
-#set(QT_GUI true)
+set(QT_GUI true)
 
 #these definitions can be use to enable or disable testing various data structures
 #add_definitions(-D_TESTING)    #testing everything, enable this for testing in general to be compiled

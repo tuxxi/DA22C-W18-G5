@@ -87,13 +87,13 @@ bool LinkedList<T>::remove(const T &removalKey)
 {
     ListNode<T> *prev = head, *curr = head->getNext();
 
-    while (curr && cmp(curr->getData(), removalKey) > 0)
+    while (curr && cmp(curr->getData(), removalKey) < 0)
     {
         prev = curr;
         curr = curr->getNext();
     }
 
-    if (!curr || cmp(curr->getData(), removalKey))
+    if (!curr || cmp(curr->getData(), removalKey) != 0)
         return false;
 
     prev->setNext(curr->getNext());
