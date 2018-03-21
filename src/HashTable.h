@@ -18,7 +18,6 @@ private:
     bool **isFilled;
     int *nFilled;
     Vector<T> *overflowArea;
-    Stack<T> *allRecords;
 
     typedef long int (*hashFn)(const T&, long int);
     hashFn _hash;
@@ -44,7 +43,7 @@ public:
     long int getTableSize() { return tableSize; }
     int getnFilled() { return tableSpacesFilled; }
     int getnCollisions() { return nCollisions; }
-    double getLoadFactor() { return tableSpacesFilled / tableSize; }
+    double getLoadFactor() { return static_cast<double>(tableSpacesFilled) / tableSize; }
 
     bool insert(const T&);
     bool remove(const T&);
@@ -226,14 +225,16 @@ bool HashTable<T>::_search(T &searchObj)
     return false;
 }
 
-template <class T>
-bool HashTable<T>::_resize()
+//template <class T>
+/*bool HashTable<T>::_resize()
 {
     T **oldTable = table;
     bool **oldIsFilled = isFilled;
+    int *oldnFilled = nFilled;
 
-    table = new T*[tableSize * 2];
-    isFilled = new bool*[tableSize * 2];
+    table = new T*[tableSize * 2] {nullptr};
+    isFilled = new bool*[tableSize * 2] {nullptr};
+    nFilled =
 
     for (int i = 0; i < tableSize; i++)
         if (oldTable[i])
@@ -255,7 +256,7 @@ bool HashTable<T>::_resize()
     tableSize *= 2;
 
     return true;
-}
+}*/
 
 template <class T>
 void HashTable<T>::_deleteTable(T **table, bool **isFilled, long int tableSize)

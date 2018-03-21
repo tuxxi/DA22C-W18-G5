@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <iomanip>
 #include "Util.h"
 
 using namespace std;
@@ -11,7 +12,6 @@ static const int SIZE = 512;
 
 
 OlympianDatabase::OlympianDatabase(ifstream &infile)
-    : nRecords(1)
 {
     // create hash table based on the prime nearest to double the number of entries
     int size = Util::Primes.getNearestPrime(SIZE);
@@ -157,9 +157,13 @@ void OlympianDatabase::displayHeightTree()
 
 void OlympianDatabase::displayHashStats()
 {
+    double loadFactor = hashTable->getLoadFactor();
+
+    loadFactor *= 100;
+
     cout << "Current Table Size: " << hashTable->getTableSize() << endl;
     cout << "Number of Buckets Used: " << hashTable->getnFilled() << endl;
-    cout << "Load Factor: " << hashTable->getLoadFactor() << endl;
+    cout << "Current Load Factor: " << setprecision(2) << fixed << loadFactor << "%\n";
     cout << "# of Collisions: " << hashTable->getnCollisions() << endl;
 }
 void OlympianDatabase::displayAll()
