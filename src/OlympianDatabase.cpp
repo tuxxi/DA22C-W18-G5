@@ -333,10 +333,6 @@ COMPARE_FN OlympianDatabase::cmpHeight(Olympian *const &a, Olympian *const &b)
     if (a->getHeight() > b->getHeight()) return COMPARE_FN::GREATER_THAN;
     return COMPARE_FN::EQUAL_TO;
 }
-int OlympianDatabase::int_cmpName(Olympian *const &a, Olympian *const &b)
-{
-    return int(cmpName(a, b));
-}
 
 void OlympianDatabase::printOlympian(Olympian *&olympian)
 {
