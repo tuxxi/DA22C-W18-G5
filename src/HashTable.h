@@ -2,6 +2,7 @@
 #define HASH_TABLE_H
 
 #include "LinkedList.h"
+#include "Stack.h"
 
 #define MAX_COLLISIONS 15
 
@@ -17,6 +18,7 @@ private:
     bool **isFilled;
     int *nFilled;
     LinkedList<T> *overflowArea;
+    Stack<T> *allRecords;
 
     typedef long int (*hashFn)(const T&, long int);
     hashFn _hash;

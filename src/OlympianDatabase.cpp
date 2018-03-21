@@ -11,7 +11,7 @@ static const int SIZE = 512;
 
 
 OlympianDatabase::OlympianDatabase(ifstream &infile)
-    : nRecords(0)
+    : nRecords(SIZE)
 {
     // create hash table based on the prime nearest to double the number of entries
     int size = Util::Primes.getNearestPrime(2 * SIZE);
@@ -186,9 +186,7 @@ bool OlympianDatabase::saveDatabase(std::string outfileName)
     }
 
     for (auto item : *allRecords)
-        outfile << item->getName() << "," << item->getSport() << "," << item->getState() << ","
-                << item->getAge() << "," << "," << item->getHeight() << "," << item->getGender()
-                << item->getnGold() << "," << "," << item->getnSilver() << "," << item->getnBronze() << endl;
+        printRecord(item, outfile);
 
     outfile.close();
     return true;
@@ -320,4 +318,11 @@ COMPARE_FN OlympianDatabase::cmpHeight(Olympian *const &a, Olympian *const &b)
     if (a->getHeight() < b->getHeight()) return COMPARE_FN::LESS_THAN;
     if (a->getHeight() > b->getHeight()) return COMPARE_FN::GREATER_THAN;
     return COMPARE_FN::EQUAL_TO;
+}
+
+void OlympianDatabase::printRecord(Olympian *const &olympian, std::ostream &os)
+{
+    os << olympian->getName() << "," << olympian->getSport() << "," << olympian->getState()
+       << "," << olympian->getAge() << "," << olympian->getHeight() << "," << olympian->getGender()
+       << "," << olympian->getnGold() << "," << olympian->getnSilver() << "," << olympian->getnBronze() << endl;
 }

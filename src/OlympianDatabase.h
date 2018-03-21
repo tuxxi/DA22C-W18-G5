@@ -1,6 +1,7 @@
 #ifndef OLYMPIAN_DATABASE_H
 #define OLYMPIAN_DATABASE_H
 
+#include <iostream>
 #include <string>
 
 #include "Olympian.h"
@@ -25,11 +26,14 @@ protected:
 
     bool _buildDatabase(std::ifstream&);
     Olympian *_readRecord(std::ifstream&);
+
     static long hashFunc(Olympian *const &olympian, long int size);
 
     static COMPARE_FN cmpName(Olympian *const &, Olympian *const &);
     static COMPARE_FN cmpAge(Olympian *const &, Olympian *const &);
     static COMPARE_FN cmpHeight(Olympian *const &, Olympian *const &);
+
+    static void printRecord(Olympian *const &, std::ostream&);
 
 public:
     explicit OlympianDatabase(std::ifstream&);
