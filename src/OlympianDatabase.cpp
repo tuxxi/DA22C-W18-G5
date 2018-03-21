@@ -244,14 +244,30 @@ Olympian *OlympianDatabase::_readRecord(std::ifstream &infile)
 bool OlympianDatabase::insert(Olympian *newEntry)
 {
     //insert into hash table first.
-    if (!hashTable->insert(newEntry)) return false;
+    if (hashTable->insert(newEntry))
+        if (ageBst->insert(newEntry))
+            if (heightBst->insert(newEntry))
+                if (alphabeticalOrderList->insert(newEntry))
+                {
+                    nRecords++;
 
-    bool success = true;
+                    return true;
+                }
+                else
+                    heightBst->remove(newEntry);
+            else
+                ageBst->remove(newEntry);
+        else
+            hashTable->remove(newEntry);
+
+    return false;
+
+    /*bool success = true;
     if (!ageBst->insert(newEntry)) success = false;
     if (!heightBst->insert(newEntry)) success = false;
-    if (!alphabeticalOrderList->insert(newEntry)) success = false;
+    if (!alphabeticalOrderList->insert(newEntry)) success = false;*/
 
-    if (!success)
+    /*if (!success)
     {
         ageBst->remove(newEntry);
         heightBst->remove(newEntry);
@@ -262,7 +278,7 @@ bool OlympianDatabase::insert(Olympian *newEntry)
 
     nRecords++;
 
-    return true;
+    return true;*/
 }
 
 bool OlympianDatabase::remove(string name)
@@ -272,18 +288,40 @@ bool OlympianDatabase::remove(string name)
     foundRecord->setName(std::move(name));
     //try to find the record first, and stop if we can't find it
     if (!hashTable->search(foundRecord)) return false;
-    bool success = true;
+
+    if (hashTable->remove(foundRecord))
+        if (ageBst->remove(foundRecord))
+            if (heightBst->remove(foundRecord))
+                if (alphabeticalOrderList->remove(foundRecord))
+                {
+                    nRecords--;
+                    deletionStack->push(foundRecord);
+
+                    return true;
+                }
+                else
+                    heightBst->insert(foundRecord);
+            else
+                ageBst->insert(foundRecord);
+        else
+            hashTable->insert(foundRecord);
+
+    return false;
+
+    /*bool success = true;
     if (!hashTable->remove(foundRecord)) success = false;
     if (!ageBst->remove(foundRecord)) success = false;
     if (!heightBst->remove(foundRecord)) success = false;
-    if (!alphabeticalOrderList->remove(foundRecord)) success = false;
+    if (!alphabeticalOrderList->remove(foundRecord)) success = false;*/
 
-    if (!success)
+    /*if (!success)
     {
         //re insert
         insert(foundRecord);
         return false;
-    }
+    }*/
+
+
     deletionStack->push(foundRecord);
     return true;
 }
