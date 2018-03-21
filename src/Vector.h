@@ -30,9 +30,9 @@ public:
     T* rbegin() { return m_array + m_count - 1; }
     T* end() { return m_array + m_count; }
     T* rend() { return m_array - 1; }
-    template<class _T>
-    template<class _T>
-    friend std::ostream& operator<<(std::ostream& str, const Vector<_T>& vec);
+    //template<class _T>
+    //template<class T>
+    friend std::ostream& operator<<(std::ostream& str, const Vector<T>& vec);
 
 private:
     void clearData();

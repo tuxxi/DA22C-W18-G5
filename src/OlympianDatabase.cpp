@@ -11,7 +11,7 @@ static const int SIZE = 512;
 
 
 OlympianDatabase::OlympianDatabase(ifstream &infile)
-    : nRecords(SIZE)
+    : nRecords(1)
 {
     // create hash table based on the prime nearest to double the number of entries
     int size = Util::Primes.getNearestPrime(2 * SIZE);

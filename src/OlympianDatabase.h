@@ -8,6 +8,7 @@
 #include "BinarySearchTree.h"
 #include "Stack.h"
 #include "Vector.h"
+#include "LinkedList.h"
 #include "HashTable.h"
 #include "Util.h"
 

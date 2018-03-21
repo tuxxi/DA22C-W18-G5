@@ -1,7 +1,7 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-#include "LinkedList.h"
+#include "Vector.h"
 #include "Stack.h"
 
 #define MAX_COLLISIONS 15
@@ -17,7 +17,7 @@ private:
     T **table;
     bool **isFilled;
     int *nFilled;
-    LinkedList<T> *overflowArea;
+    Vector<T> *overflowArea;
     Stack<T> *allRecords;
 
     typedef long int (*hashFn)(const T&, long int);
@@ -28,6 +28,8 @@ private:
 
     bool _insert(const T&);
     bool _insertOverflow(const T&);
+    bool _removeOverflow(const T&);
+    bool _searchOverflow(T&);
     bool _checkDuplicate(const T&, long int);
     bool _remove(const T&);
     bool _search(T&);
@@ -59,7 +61,7 @@ HashTable<T>::HashTable(long int tableSize, int bucketSize, hashFn hash, cmpFn c
     this->table = new T*[tableSize] {nullptr};
     this->isFilled = new bool*[tableSize] {nullptr};
     this->nFilled = new int[tableSize] {0};
-    this->overflowArea = new LinkedList<T>(cmp);
+    this->overflowArea = new Vector<T>;
     this->_hash = hash;
     this->cmp = cmp;
 }
@@ -73,13 +75,13 @@ bool HashTable<T>::insert(const T &newData)
 template <class T>
 bool HashTable<T>::remove(const T &removalKey)
 {
-    return (_remove(removalKey) || overflowArea->insert(removalKey));
+    return (_remove(removalKey) || _removeOverflow(removalKey));
 }
 
 template <class T>
 bool HashTable<T>::search(T &searchObj)
 {
-    return (_search(searchObj) || overflowArea->search(searchObj));
+    return (_search(searchObj) || _searchOverflow(searchObj));
 }
 
 template <class T>
@@ -90,7 +92,7 @@ bool HashTable<T>::_insert(const T &newData)
 
     if (table[hashVal])
     {
-        if (!_checkDuplicate(newData, hashVal) && !overflowArea->search((searchObj = newData)))
+        if (!_checkDuplicate(newData, hashVal) && !_searchOverflow((searchObj = newData)))
         {
             if (nFilled[hashVal] < bucketSize)
             {
@@ -127,7 +129,7 @@ bool HashTable<T>::_insert(const T &newData)
 template <class T>
 bool HashTable<T>::_insertOverflow(const T &newData)
 {
-    if (overflowArea->insert(newData))
+    if (overflowArea->add(newData))
     {
         nCollisions++;
 
@@ -136,6 +138,38 @@ bool HashTable<T>::_insertOverflow(const T &newData)
 
         return true;
     }
+
+    return false;
+}
+
+template <class T>
+bool HashTable<T>::_removeOverflow(const T &removalKey)
+{
+    int n = overflowArea->size();
+
+    for (int i = 0; i < n; i++)
+        if (cmp((*overflowArea)[i], removalKey) == COMPARE_FN::EQUAL_TO)
+        {
+            overflowArea->remove(i);
+
+            return true;
+        }
+
+    return false;
+}
+
+template <class T>
+bool HashTable<T>::_searchOverflow(T &searchObj)
+{
+    int n = overflowArea->size();
+
+    for (int i = 0; i < n; i++)
+        if (cmp((*overflowArea)[i], searchObj) == COMPARE_FN::EQUAL_TO)
+        {
+            searchObj = (*overflowArea)[i];
+
+            return true;
+        }
 
     return false;
 }
