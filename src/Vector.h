@@ -17,7 +17,7 @@ public:
 
     Vector<T>& operator=(const Vector<T> &other);
 
-    void add(const T& item);
+    bool add(const T& item);
     bool reserve(size_t size);
     bool remove(size_t idx);
     void clear();
@@ -30,6 +30,7 @@ public:
     T* rbegin() { return m_array + m_count - 1; }
     T* end() { return m_array + m_count; }
     T* rend() { return m_array - 1; }
+    template<class _T>
     template<class _T>
     friend std::ostream& operator<<(std::ostream& str, const Vector<_T>& vec);
 
@@ -55,18 +56,21 @@ Vector<T>::~Vector()
 }
 
 template<class T>
-void Vector<T>::add(const T& item)
+bool Vector<T>::add(const T& item)
 {
     const size_t newIdx = m_count;
     if (newIdx >= m_arraySize) //check if we need to resize the array
     {
         //resize to 2x the current size
-        reserve(m_arraySize * 2);
+        if (!reserve(m_arraySize * 2))
+                    return false;
     }
 
     //copy the new item into array using T's copy constructor
     m_array[newIdx] = T(item);    
     m_count++;
+
+    return true;
 }
 
 template<class T>
