@@ -30,7 +30,6 @@ protected:
     static COMPARE_FN cmpName(Olympian *const &, Olympian *const &);
     static COMPARE_FN cmpAge(Olympian *const &, Olympian *const &);
     static COMPARE_FN cmpHeight(Olympian *const &, Olympian *const &);
-    static void printOlympian(Olympian*&);
 
 public:
     explicit OlympianDatabase(std::ifstream&);

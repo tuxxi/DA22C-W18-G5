@@ -11,10 +11,10 @@ static const int SIZE = 512;
 
 
 OlympianDatabase::OlympianDatabase(ifstream &infile)
-    : nRecords(SIZE)
+    : nRecords(0)
 {
     // create hash table based on the prime nearest to double the number of entries
-    int size = Util::Primes.getNearestPrime(2 * nRecords);
+    int size = Util::Primes.getNearestPrime(2 * SIZE);
 
     hashTable = new HashTable<Olympian*>(size, BUCKET_SIZE, hashFunc, cmpName);
     ageBst = new BinarySearchTree<Olympian*>(cmpAge);
@@ -135,12 +135,16 @@ Vector<Olympian*> OlympianDatabase::getTallest()
 
 void OlympianDatabase::displayAgeInOrder()
 {
-    ageBst->inOrder(printOlympian);
+    Vector<Olympian*> printVec;
+    ageBst->insertInorder(printVec);
+    cout << printVec;
 }
 
 void OlympianDatabase::displayHeightInOrder()
 {
-    heightBst->inOrder(printOlympian);
+    Vector<Olympian*> printVec;
+    heightBst->insertInorder(printVec);
+    cout << printVec;
 }
 
 void OlympianDatabase::displayAgeTree()
@@ -163,7 +167,7 @@ void OlympianDatabase::displayAll()
 {
     for (auto oly : *allRecords)
     {
-        printOlympian(oly);
+        cout << *oly;
     }
 }
 void OlympianDatabase::displayAlphabeticalOrder()
@@ -192,25 +196,8 @@ bool OlympianDatabase::saveDatabase(std::string outfileName)
 
 bool OlympianDatabase::_buildDatabase(ifstream &infile)
 {
-    /*size_t lineNum = 1; //skip first line
-    //read all entries into vector*/
-    Olympian *newRecord;
-
-    while ((newRecord = _readRecord(infile)))
+    while (auto newRecord = _readRecord(infile))
         insert(newRecord);
-
-
-#ifdef _DEBUG
-    cout << "Hash table size was << " << nRecords << endl;
-#endif
-
-    //insert the records into the data structures
-    //this is only O(2 * n) so this is fine, and it allows us to control
-    //the initial hash table size without rehashing a lot
-    /*for (auto oly : *allRecords)
-    {
-        insert(oly);
-    }*/
     return true;
 }
 
@@ -333,12 +320,4 @@ COMPARE_FN OlympianDatabase::cmpHeight(Olympian *const &a, Olympian *const &b)
     if (a->getHeight() < b->getHeight()) return COMPARE_FN::LESS_THAN;
     if (a->getHeight() > b->getHeight()) return COMPARE_FN::GREATER_THAN;
     return COMPARE_FN::EQUAL_TO;
-}
-
-void OlympianDatabase::printOlympian(Olympian *&olympian)
-{
-    if (olympian)
-        cout << *olympian << endl;
-    else
-        cout << "ERROR! null pointer in database. \n";
 }

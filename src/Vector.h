@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cstring>
 #include <stdexcept>
+#include <iostream>
+
 template<class T>
 class Vector
 {
@@ -26,6 +28,9 @@ public:
     T* rbegin() { return m_array + m_count - 1; }
     T* end() { return m_array + m_count; }
     T* rend() { return m_array - 1; }
+    template<class _T>
+    friend std::ostream& operator<<(std::ostream& str, const Vector<_T>& vec);
+
 private:
     void clearData();
     static const size_t DEFAULT_SIZE = 8;
@@ -137,4 +142,13 @@ template<class T>
 size_t Vector<T>::size() const
 {
     return m_count;
+}
+template<class T>
+std::ostream& operator<<(std::ostream& str, Vector<T>& vec)
+{
+    for (T* it = vec.begin(); it != vec.end(); ++it)
+    {
+        str << *it;
+    }
+    return str;
 }

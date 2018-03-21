@@ -29,10 +29,6 @@ public:
     int size() const { return count; }
     void clear() { _destroy(rootPtr); rootPtr = nullptr; count = 0; }
 
-    void preOrder(void visit(T &)) const {_preorder(visit, rootPtr);}
-    void inOrder(void visit(T &)) const  {_inorder(visit, rootPtr);}
-    void postOrder(void visit(T &)) const{_postorder(visit, rootPtr);}
-
     // insert a node at the correct location
     bool insert(const T& newEntry);
     // remove a node if found
@@ -87,11 +83,7 @@ private:
 
     // internal traverse for copy
     node* _copy(const node* nodePtr);
-    // internal traverse
-    void _preorder(void visit(T &), node* nodePtr) const;
-    void _inorder(void visit(T &), node* nodePtr) const;
-    void _postorder(void visit(T &), node* nodePtr) const;
-
+    // internal traverse to insert into vector
     void _insert_inorder(node* nodePtr, Vector<T>& v);
     //indented list traverse
     void _print(node* nodePtr, std::ostream& stream, int indentLevel) const;
@@ -384,45 +376,6 @@ typename BinarySearchTree<T>::node *BinarySearchTree<T>::_copy(const node* nodeP
     }
     return newNode;
 }
-//internal preorderder traverse
-template<class T>
-void BinarySearchTree<T>::_preorder(void visit(T &), node* nodePtr) const
-{
-    if (nodePtr)
-    {
-        T item = nodePtr->item;
-        visit(item);
-        _preorder(visit, nodePtr->leftPtr);
-        _preorder(visit, nodePtr->rightPtr);
-    }
-}
-
-//internal inorder traverse
-template<class T>
-void BinarySearchTree<T>::_inorder(void visit(T &), node* nodePtr) const
-{
-    if (nodePtr)
-    {
-        _inorder(visit, nodePtr->leftPtr);
-        T item = nodePtr->item;
-        visit(item);
-        _inorder(visit, nodePtr->rightPtr);
-    }
-}
-
-//internal postorder traverse
-template<class T>
-void BinarySearchTree<T>::_postorder(void visit(T &), node* nodePtr) const
-{
-    if (nodePtr)
-    {
-        _postorder(visit, nodePtr->leftPtr);
-        _postorder(visit, nodePtr->rightPtr);
-        T item = nodePtr->item;
-        visit(item);
-    }
-}
-
 template <class T>
 void BinarySearchTree<T>::_insert_inorder(node* nodePtr, Vector<T>& v)
 {
