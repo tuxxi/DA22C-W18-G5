@@ -42,7 +42,6 @@ OlympianDatabase::~OlympianDatabase()
 
 bool OlympianDatabase::undoDelete()
 {
-
     Olympian *lastDeleted;
 
     if (deletionStack->pop(lastDeleted))

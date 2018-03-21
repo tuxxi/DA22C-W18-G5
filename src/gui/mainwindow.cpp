@@ -3,9 +3,13 @@
 #include <QGridLayout>
 #include <QFrame>
 #include <QMessageBox>
-#include <QLabel>
+#include <QFrame>
+#include <QFormLayout>
+#include <QGroupBox>
 
 #include <fstream>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QtWidgets>
 
 #include "mainwindow.hpp"
 
@@ -19,9 +23,7 @@ MainWindow::MainWindow(QWidget* parent)
     SetupUi();
 }
 
-MainWindow::~MainWindow()
-{
-}
+MainWindow::~MainWindow() = default;
 
 void MainWindow::ReadFile()
 {
@@ -29,7 +31,7 @@ void MainWindow::ReadFile()
     std::ifstream file(DEFAULT_INFILE);
     if (!file)
     {
-        //propmt the user to open a file
+        //prompt the user to open a file
         auto filename = QFileDialog::getOpenFileName(this,
             tr("Open Database"), "", tr(".csv files (*.csv)"));
         file = std::ifstream(filename.toUtf8().constData());
@@ -37,7 +39,7 @@ void MainWindow::ReadFile()
     //if we still didn't open a file, just exit
     if (!file) exit(-1);
 
-    database = std::make_unique<OlympianDatabase>(file);
+    m_database = std::make_unique<OlympianDatabase>(file);
 }
 
 void MainWindow::SetupUi()
@@ -45,68 +47,123 @@ void MainWindow::SetupUi()
     setWindowTitle(tr("Winter Olympian Database - De Anza College, CIS 22C, Group 5"));
     setGeometry(100, 100, 800, 600);
 
-    statusBar = new QStatusBar;
-    setStatusBar(statusBar);
-    statusBar->showMessage("Ready.");
+    m_statusBar = new QStatusBar;
+    setStatusBar(m_statusBar);
+    m_statusBar->showMessage("Ready.");
+    /*
+     * Table
+     */
+    m_model = new OlympianTableModel(*m_database);
+    m_tableView = new QTableView;
+    m_tableView->setModel(m_model);
+    //set some behaviors for our table
+    m_tableView->setAlternatingRowColors(true);
+    m_tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    m_tableView->setSizeAdjustPolicy(QAbstractItemView::SizeAdjustPolicy::AdjustToContents);
+    m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    /*
+     * Tab widget for accessing and modifying the data
+     */
+    m_tabWidget = new QTabWidget;
 
     /*
-     * Search
+     * Search and Sort
      */
-    auto label = new QLabel(tr("Search for an entry: "));
-    searchLine = new QLineEdit;
-    searchBtn = new QPushButton(tr("Search"));
-    connect(searchBtn, &QPushButton::clicked,
+    m_searchLine = new QLineEdit;
+    m_searchBtn = new QPushButton(tr("Search"));
+    connect(m_searchBtn, &QPushButton::clicked,
         this, &MainWindow::OnSearchButtonClicked);
 
-    searchTypeCBox = new QComboBox;
-    searchTypeCBox->addItems(QStringList()
+    m_searchTypeCBox = new QComboBox;
+    m_searchTypeCBox->addItems(QStringList()
                                  << "By Name"
                                  << "By Age"
                                  << "By Height");
 
-    auto searchLayout = new QHBoxLayout;
-    searchLayout->addWidget(label);
-    searchLayout->addWidget(searchLine);
-    searchLayout->addSpacing(10);
-    searchLayout->addWidget(searchBtn);
-    searchLayout->addWidget(searchTypeCBox);
+    auto searchLayout = new QFormLayout;
+    searchLayout->addWidget(m_searchLine);
+    searchLayout->addWidget(m_searchBtn);
+    auto hSearch = new QHBoxLayout;
+    hSearch->addWidget(m_searchBtn);
+    hSearch->addWidget(m_searchTypeCBox);
+    searchLayout->addRow(hSearch);
+    auto gbSearch = new QGroupBox(tr("Search for an entry"));
+    gbSearch->setLayout(searchLayout);
 
-    /*
-     * Sort
-     */
-    auto sortLabel = new QLabel(tr("Display all and sort:"));
-    sortTypeCBox = new QComboBox;
-    sortTypeCBox->addItems(QStringList()
+    m_sortTypeCBox = new QComboBox;
+    m_sortTypeCBox->addItems(QStringList()
                                  << "By Name"
                                  << "By Age"
                                  << "By Height");
 
-    sortBtn = new QPushButton(tr("Sort"));
-    connect(sortBtn, &QPushButton::clicked,
+    m_sortBtn = new QPushButton(tr("Sort"));
+    connect(m_sortBtn, &QPushButton::clicked,
             this, &MainWindow::OnSortButtonClicked);
 
-    auto sortLayout = new QHBoxLayout;
-    sortLayout->addWidget(sortLabel);
-    sortLayout->addWidget(sortTypeCBox);
-    sortLayout->addWidget(sortBtn);
+    auto sortLayout = new QFormLayout;
+    auto hSort = new QHBoxLayout;
+    hSort->addWidget(m_sortBtn);
+    hSort->addWidget(m_sortTypeCBox);
+    sortLayout->addRow(hSort);
+    auto gbSort = new QGroupBox(tr("Display all and sort"));
+    gbSort->setLayout(sortLayout);
+    auto snsFrame = new QFrame;
+    auto vSearchAndSort = new QVBoxLayout;
+    vSearchAndSort->addWidget(gbSearch);
+    vSearchAndSort->addWidget(gbSort);
+    snsFrame->setLayout(vSearchAndSort);
+    m_tabWidget->addTab(snsFrame, "Search / Sort");
 
-    model = new OlympianTableModel(*database);
-    tableView = new QTableView;
-    tableView->setModel(model);
+    /*
+     * Edit
+     */
+    m_addBtn = new QPushButton(tr("Add new data"));
+    m_addBtn->setMinimumHeight(100);
+    connect(m_addBtn, &QPushButton::clicked,
+            this, &MainWindow::OnAddNewButtonClicked);
 
-    auto gridlayout = new QGridLayout;
-    gridlayout->addLayout(searchLayout, 0, 0);
-    gridlayout->addLayout(sortLayout, 1, 0);
-    gridlayout->addWidget(tableView, 2, 0);
+    m_deleteBtn = new QPushButton(tr("Delete selected entries"));
+    m_deleteBtn->setMinimumHeight(100);
+    connect(m_deleteBtn, &QPushButton::clicked,
+        this, &MainWindow::OnDeleteButtonClicked);
+
+    m_undoDeleteBtn = new QPushButton(tr("Undo delete"));
+    m_undoDeleteBtn->setMinimumHeight(50);
+    connect(m_undoDeleteBtn, &QPushButton::clicked,
+            this, &MainWindow::OnUndoDeleteButtonClicked);
+
+    auto controlsLayout = new QVBoxLayout;
+    controlsLayout->addWidget(m_addBtn);
+    controlsLayout->addWidget(m_deleteBtn);
+    controlsLayout->addWidget(m_undoDeleteBtn);
+    auto groupBox = new QGroupBox(tr("Controls"));
+    groupBox->setLayout(controlsLayout);
+
+    auto gbEdit = new QGroupBox(tr("Add and remove data"));
+    gbEdit->setLayout(controlsLayout);
+    m_tabWidget->addTab(gbEdit, "Edit");
+
+    /*
+     * Master Layout
+     */
+    auto masterLayout = new QVBoxLayout;
+    auto masterHLayout = new QHBoxLayout;
+    masterHLayout->addWidget(m_tableView);
+    masterHLayout->addWidget(m_tabWidget);
+    //the two columns have 10:1 stretch size ratio
+    masterHLayout->setStretch(0, 10);
+    masterHLayout->setStretch(1, 1);
+
+    masterLayout->addLayout(masterHLayout);
 
     auto frame = new QFrame;
-    frame->setLayout(gridlayout);
+    frame->setLayout(masterLayout);
     setCentralWidget(frame);
 }
 void MainWindow::OnSearchButtonClicked()
 {
-    std::string searchTerm = searchLine->text().toStdString();
-    switch(searchTypeCBox->currentIndex())
+    std::string searchTerm = m_searchLine->text().toStdString();
+    switch(m_searchTypeCBox->currentIndex())
     {
     default:
     case 0:
@@ -122,28 +179,82 @@ void MainWindow::OnSearchButtonClicked()
 }
 void MainWindow::OnSortButtonClicked()
 {
-    switch(sortTypeCBox->currentIndex())
+    switch(m_sortTypeCBox->currentIndex())
     {
     default:
     case 0:
-        model->setSortByName();
+        m_model->setSortByName();
+        statusBar()->showMessage(tr("Sorted by name."));
         break;
     case 1:
-        model->setSortByAge();
+        m_model->setSortByAge();
+        statusBar()->showMessage(tr("Sorted by age."));
         break;
     case 2:
-        model->setSortByHeight();
+        m_model->setSortByHeight();
+        statusBar()->showMessage(tr("Sorted by height."));
         break;
     }
+}
+void MainWindow::OnDeleteButtonClicked()
+{
+    QItemSelectionModel *select = m_tableView->selectionModel();
+
+    if (select->hasSelection())
+    {
+        QModelIndexList rows = select->selectedRows(); // return selected row(s)
+        for (auto& row : rows)
+        {
+            QString qOlyName = row.data(0).toString();
+            std::string olyName = qOlyName.toStdString();
+            if (m_database->remove(olyName))
+            {
+                //delete was successful
+                m_model->removeRow(row.row());
+                QString message = QString("Deleted ") + qOlyName;
+                m_statusBar->showMessage(message);
+            }
+            else
+            {
+                QMessageBox::warning(this, "Could not delete!",
+                                     "Could not delete Olympian " + qOlyName + "!");
+            }
+        }
+    }
+    else
+    {
+        QMessageBox::warning(this, "No Item Selected!", "You must select item(s) to delete.");
+    }
+}
+void MainWindow::OnUndoDeleteButtonClicked()
+{
+    if (auto oly = m_model->undoDelete())
+    {
+        auto message = QString("Un-deleted ") + QString::fromStdString(oly->getName()) + "!";
+        m_tableView->update();
+        m_statusBar->showMessage(message);
+    }
+    else
+    {
+        QMessageBox::warning(this, "No delete left", "Nothing left to undo!");
+    }
+}
+void MainWindow::OnAddNewButtonClicked()
+{
+
 }
 
 void MainWindow::SearchByName(const std::string& name)
 {
-    if (auto item = database->searchByName(name))
+    if (auto item = m_database->searchByName(name))
     {
         Vector<Olympian*> v;
         v.add(item);
-        model->resetModel(v);
+        m_model->resetModel(v);
+        auto message = QString("Found an entry for ")
+            + QString::fromStdString(item->getName()) + QString(" !");
+        m_statusBar->showMessage(message);
+
     }
     else
     {
@@ -156,9 +267,12 @@ void MainWindow::SearchByAge(const std::string &age)
     {
         //add the search results into the display
         Vector<Olympian*> vec;
-        if (database->searchByAge(std::stoi(age), vec))
+        if (m_database->searchByAge(std::stoi(age), vec))
         {
-            model->resetModel(vec);
+            m_model->resetModel(vec);
+            auto message = QString("Found ")
+                + QString::number(vec.size()) + QString(" entries!");
+            statusBar()->showMessage(message);
         }
         else
         {
@@ -177,9 +291,12 @@ void MainWindow::SearchByHeight(const std::string &height)
     {
         //add the search results into the display
         Vector<Olympian*> vec;
-        if (database->searchByHeight(std::stoi(height), vec))
+        if (m_database->searchByHeight(std::stoi(height), vec))
         {
-            model->resetModel(vec);
+            m_model->resetModel(vec);
+            auto message = QString("Found ")
+                + QString::number(vec.size()) + QString(" entries!");
+            statusBar()->showMessage(message);
         }
         else
         {

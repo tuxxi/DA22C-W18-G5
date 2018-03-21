@@ -18,6 +18,7 @@ public:
     Vector<T>& operator=(const Vector<T> &other);
 
     bool add(const T& item);
+    bool insertAt(const T& item, int index);
     bool reserve(size_t size);
     bool remove(size_t idx);
     void clear();
@@ -30,9 +31,10 @@ public:
     T* rbegin() { return m_array + m_count - 1; }
     T* end() { return m_array + m_count; }
     T* rend() { return m_array - 1; }
-    //template<class _T>
-    //template<class T>
-    friend std::ostream& operator<<(std::ostream& str, const Vector<T>& vec);
+
+    //I do this to suppress -Wnon-template-friend
+    template<class _T>
+    friend std::ostream& operator<<(std::ostream& str, const Vector<_T>& vec);
 
 private:
     void clearData();
@@ -72,7 +74,24 @@ bool Vector<T>::add(const T& item)
 
     return true;
 }
-
+template<class T>
+bool Vector<T>::insertAt(const T &item, int idx)
+{
+    if (idx < 0) return false;
+    else if (idx >= m_count) //we don't need to do anything if the requested index is >= the current count, we just
+    {                       //add the new item on the end like usual
+        add(item);
+    }
+    else
+    {
+        //shift the vector's elements one place up
+        size_t size = sizeof(T) * (m_count - idx + 1);
+        std::memmove(begin() + idx, begin() + idx - 1, size);
+        m_array[idx] = T(item);
+    }
+    m_count++;
+    return true;
+}
 template<class T>
 bool Vector<T>::reserve(size_t size)
 {
@@ -157,10 +176,11 @@ Vector<T>& Vector<T>::operator=(const Vector<T> &other)
     this->m_count = other.m_count;
     return *this;
 }
-template<class T>
-std::ostream& operator<<(std::ostream& str, Vector<T>& vec)
+
+template<class _T>
+std::ostream& operator<<(std::ostream& str, Vector<_T>& vec)
 {
-    for (T* it = vec.begin(); it != vec.end(); ++it)
+    for (_T* it = vec.begin(); it != vec.end(); ++it)
     {
         str << *it;
     }

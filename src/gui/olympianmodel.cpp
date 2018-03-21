@@ -2,9 +2,8 @@
 #include "olympianmodel.hpp"
 
 OlympianTableModel::OlympianTableModel(OlympianDatabase& database, QObject *parent)
-    : QAbstractTableModel(parent), OlympianDatabase(database)
+    : QAbstractTableModel(parent), OlympianDatabase(database), m_sortType(SORT_TYPE::by_name)
 {
-
     //default to sorting in alphabetical order
     setSortByName();
 }
@@ -12,7 +11,7 @@ OlympianTableModel::OlympianTableModel(OlympianDatabase& database, QObject *pare
 int OlympianTableModel::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    return int(currentDisplay.size());
+    return int(m_currentDisplayVec.size());
 }
 
 int OlympianTableModel::columnCount(const QModelIndex& parent) const
@@ -64,7 +63,7 @@ QVariant OlympianTableModel::data(const QModelIndex& index, int role) const
         return QVariant();
 
     if (role == Qt::DisplayRole) {
-        const auto olympian = currentDisplay.at(index.row());
+        const auto olympian = m_currentDisplayVec.at(index.row());
 
         if (index.column() == 0)
             return QVariant(QString::fromStdString(olympian->getName()));
@@ -88,43 +87,73 @@ QVariant OlympianTableModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-bool OlympianTableModel::insertRows(int row, int count, const QModelIndex& parent)
-{
-    return false;
-}
-
 bool OlympianTableModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    return false;
+    beginRemoveRows(parent, row, row + count - 1);
+
+    for (int i = row; i < row + count; ++i)
+    {
+        auto oly = m_currentDisplayVec[i];
+        auto pair = std::pair<Olympian*, int>(oly, i);
+        m_deleteStack.push(pair);
+        if (!m_currentDisplayVec.remove(size_t(i)))
+            return false;
+    }
+    endRemoveRows();
+    return true;
 }
 void OlympianTableModel::setSortByAge()
 {
     beginResetModel();
-    currentDisplay.clear();
+    m_currentDisplayVec.clear();
     //traverse age BST in order to reorder the data that's being displayed
-    OlympianDatabase::ageBst->insertInorder(currentDisplay);
+    OlympianDatabase::ageBst->insertInorder(m_currentDisplayVec);
+    m_sortType = SORT_TYPE::by_age;
     endResetModel();
 }
 
 void OlympianTableModel::setSortByHeight()
 {
     beginResetModel();
-    currentDisplay.clear();
+    m_currentDisplayVec.clear();
     //traverse age BST in order to reorder the data that's being displayed
-    OlympianDatabase::heightBst->insertInorder(currentDisplay);
+    OlympianDatabase::heightBst->insertInorder(m_currentDisplayVec);
+    m_sortType = SORT_TYPE::by_height;
     endResetModel();
 }
 
 void OlympianTableModel::setSortByName()
 {
     beginResetModel();
-    currentDisplay.clear();
-    OlympianDatabase::alphabeticalOrderList->insertToVector(currentDisplay);
+    m_currentDisplayVec.clear();
+    //traverse the linked list to reorder the display data
+    OlympianDatabase::alphabeticalOrderList->insertToVector(m_currentDisplayVec);
+    m_sortType = SORT_TYPE::by_name;
     endResetModel();
 }
 void OlympianTableModel::resetModel(Vector<Olympian *> &vec)
 {
     beginResetModel();
-    currentDisplay = vec;
+    m_currentDisplayVec = vec;
+    m_sortType = SORT_TYPE::by_search;
     endResetModel();
+}
+Olympian* OlympianTableModel::undoDelete()
+{
+    if (OlympianDatabase::undoDelete())
+    {
+        std::pair<Olympian*, int> deletedItem;
+        if (!m_deleteStack.pop(deletedItem)) return nullptr;
+
+        int row = deletedItem.second;
+        Olympian* oly = deletedItem.first;
+
+        auto idx = createIndex(row, 0);
+        beginInsertRows(idx, row, row + 1);
+        m_currentDisplayVec.insertAt(oly, row);
+        endInsertRows();
+        emit dataChanged(idx, createIndex(row, 9));
+        return oly;
+    }
+    return nullptr;
 }
