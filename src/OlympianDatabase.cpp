@@ -157,9 +157,10 @@ void OlympianDatabase::displayHeightTree()
 
 void OlympianDatabase::displayHashStats()
 {
+    cout << "Current Table Size: " << hashTable->getTableSize() << endl;
+    cout << "Number of Buckets Used: " << hashTable->getnFilled() << endl;
     cout << "Load Factor: " << hashTable->getLoadFactor() << endl;
     cout << "# of Collisions: " << hashTable->getnCollisions() << endl;
-    cout << "Total size: " << hashTable->getnFilled() << endl;
 }
 void OlympianDatabase::displayAll()
 {
