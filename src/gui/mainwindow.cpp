@@ -49,17 +49,16 @@ void MainWindow::SetupUi()
     setStatusBar(statusBar);
     statusBar->showMessage("Ready.");
 
-    model = new OlympianTableModel(*database);
-    tableView = new QTableView;
-    tableView->setModel(model);
-
+    /*
+     * Search
+     */
     auto label = new QLabel(tr("Search for an entry: "));
     searchLine = new QLineEdit;
     searchBtn = new QPushButton(tr("Search"));
     connect(searchBtn, &QPushButton::clicked,
         this, &MainWindow::OnSearchButtonClicked);
-    searchTypeCBox = new QComboBox;
 
+    searchTypeCBox = new QComboBox;
     searchTypeCBox->addItems(QStringList()
                                  << "By Name"
                                  << "By Age"
@@ -71,9 +70,34 @@ void MainWindow::SetupUi()
     searchLayout->addSpacing(10);
     searchLayout->addWidget(searchBtn);
     searchLayout->addWidget(searchTypeCBox);
+
+    /*
+     * Sort
+     */
+    auto sortLabel = new QLabel(tr("Display all and sort:"));
+    sortTypeCBox = new QComboBox;
+    sortTypeCBox->addItems(QStringList()
+                                 << "By Name"
+                                 << "By Age"
+                                 << "By Height");
+
+    sortBtn = new QPushButton(tr("Sort"));
+    connect(sortBtn, &QPushButton::clicked,
+            this, &MainWindow::OnSortButtonClicked);
+
+    auto sortLayout = new QHBoxLayout;
+    sortLayout->addWidget(sortLabel);
+    sortLayout->addWidget(sortTypeCBox);
+    sortLayout->addWidget(sortBtn);
+
+    model = new OlympianTableModel(*database);
+    tableView = new QTableView;
+    tableView->setModel(model);
+
     auto gridlayout = new QGridLayout;
     gridlayout->addLayout(searchLayout, 0, 0);
-    gridlayout->addWidget(tableView, 1, 0);
+    gridlayout->addLayout(sortLayout, 1, 0);
+    gridlayout->addWidget(tableView, 2, 0);
 
     auto frame = new QFrame;
     frame->setLayout(gridlayout);
@@ -96,9 +120,35 @@ void MainWindow::OnSearchButtonClicked()
         break;
     }
 }
+void MainWindow::OnSortButtonClicked()
+{
+    switch(sortTypeCBox->currentIndex())
+    {
+    default:
+    case 0:
+        model->setSortByName();
+        break;
+    case 1:
+        model->setSortByAge();
+        break;
+    case 2:
+        model->setSortByHeight();
+        break;
+    }
+}
+
 void MainWindow::SearchByName(const std::string& name)
 {
-
+    if (auto item = database->searchByName(name))
+    {
+        Vector<Olympian*> v;
+        v.add(item);
+        model->resetModel(v);
+    }
+    else
+    {
+        QMessageBox::warning(this, "No Results Found!", "No results found.");
+    }
 }
 void MainWindow::SearchByAge(const std::string &age)
 {

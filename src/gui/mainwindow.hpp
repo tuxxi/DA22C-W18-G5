@@ -19,15 +19,17 @@ public:
     void ReadFile();
 private slots:
     void OnSearchButtonClicked();
+    void OnSortButtonClicked();
 private:
     void SearchByName(const std::string& name);
     void SearchByAge(const std::string& age);
     void SearchByHeight(const std::string& height);
 
     void SetupUi();
-    QComboBox* searchTypeCBox;
+    QComboBox* searchTypeCBox, *sortTypeCBox;
     QLineEdit* searchLine;
-    QPushButton* searchBtn;
+    QPushButton* searchBtn, *sortBtn;
+
     OlympianTableModel* model;
     QStatusBar* statusBar;
     QTableView* tableView;
