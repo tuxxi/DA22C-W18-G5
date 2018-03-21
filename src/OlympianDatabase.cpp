@@ -93,44 +93,6 @@ bool OlympianDatabase::searchByHeight(int height, Vector<Olympian*>& vecResults)
     return !vecResults.empty();
 }
 
-Vector<Olympian*> OlympianDatabase::getYoungest()
-{
-    Olympian *youngest = ageBst->findSmallest();
-    Vector<Olympian*> results;
-
-    ageBst->findAllEntries(youngest, results);
-    return results;
-}
-
-Vector<Olympian*> OlympianDatabase::getOldest()
-{
-    Olympian *oldest = ageBst->findLargest();
-    Vector<Olympian*> results;
-
-    ageBst->findAllEntries(oldest, results);
-
-    return results;
-}
-
-Vector<Olympian*> OlympianDatabase::getShortest()
-{
-    Olympian *shortest = heightBst->findSmallest();
-    Vector<Olympian*> results;
-
-    heightBst->findAllEntries(shortest, results);
-    return results;
-}
-
-Vector<Olympian*> OlympianDatabase::getTallest()
-{
-    Olympian *tallest = heightBst->findLargest();
-    Vector<Olympian*> results;
-
-    heightBst->findAllEntries(tallest, results);
-
-    return results;
-}
-
 void OlympianDatabase::displayAgeInOrder()
 {
     Vector<Olympian*> printVec;

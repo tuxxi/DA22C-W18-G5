@@ -59,7 +59,7 @@ QVariant OlympianTableModel::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (index.row() >= OlympianDatabase::getnRecords() || index.row() < 0)
+    if (index.row() >= m_currentDisplayVec.size() || index.row() < 0)
         return QVariant();
 
     if (role == Qt::DisplayRole) {
@@ -131,6 +131,7 @@ void OlympianTableModel::setSortByName()
     m_sortType = SORT_TYPE::by_name;
     endResetModel();
 }
+
 void OlympianTableModel::resetModel(Vector<Olympian *> &vec)
 {
     beginResetModel();

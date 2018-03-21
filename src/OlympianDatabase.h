@@ -49,11 +49,6 @@ public:
     bool searchByAge(int, Vector<Olympian*>&);
     bool searchByHeight(int, Vector<Olympian*>&);
 
-    Vector<Olympian*> getYoungest();
-    Vector<Olympian*> getOldest();
-    Vector<Olympian*> getShortest();
-    Vector<Olympian*> getTallest();
-
     void displayAgeInOrder();
     void displayHeightInOrder();
     void displayAll();

@@ -1,17 +1,15 @@
 #include <QFileDialog>
 #include <QStatusBar>
-#include <QGridLayout>
-#include <QFrame>
 #include <QMessageBox>
 #include <QFrame>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHeaderView>
 
 #include <fstream>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QtWidgets>
 
 #include "mainwindow.hpp"
+#include "addolympiandialog.hpp"
 
 #define DEFAULT_INFILE "winter-olympics.csv"
 #define DEFAULT_OUTFILE "winter-olympics-out.csv"
@@ -80,13 +78,14 @@ void MainWindow::SetupUi()
                                  << "By Age"
                                  << "By Height");
 
-    auto searchLayout = new QFormLayout;
+    auto searchLayout = new QVBoxLayout;
     searchLayout->addWidget(m_searchLine);
-    searchLayout->addWidget(m_searchBtn);
+
     auto hSearch = new QHBoxLayout;
     hSearch->addWidget(m_searchBtn);
     hSearch->addWidget(m_searchTypeCBox);
-    searchLayout->addRow(hSearch);
+    searchLayout->addLayout(hSearch);
+
     auto gbSearch = new QGroupBox(tr("Search for an entry"));
     gbSearch->setLayout(searchLayout);
 
@@ -198,15 +197,13 @@ void MainWindow::OnSortButtonClicked()
 }
 void MainWindow::OnDeleteButtonClicked()
 {
-    QItemSelectionModel *select = m_tableView->selectionModel();
-
-    if (select->hasSelection())
+    if (m_tableView->selectionModel()->hasSelection()) 
     {
-        QModelIndexList rows = select->selectedRows(); // return selected row(s)
+        QModelIndexList rows = m_tableView->selectionModel()->selectedRows(); // return selected row(s)
         for (auto& row : rows)
         {
-            QString qOlyName = row.data(0).toString();
-            std::string olyName = qOlyName.toStdString();
+            QString qOlyName = row.data(0).toString(); // this row's name
+            std::string olyName = qOlyName.toStdString(); 
             if (m_database->remove(olyName))
             {
                 //delete was successful
@@ -236,12 +233,14 @@ void MainWindow::OnUndoDeleteButtonClicked()
     }
     else
     {
-        QMessageBox::warning(this, "No delete left", "Nothing left to undo!");
+        QMessageBox::information(this, "No delete left", "Nothing left to undo!");
     }
 }
+
 void MainWindow::OnAddNewButtonClicked()
 {
-
+    auto dialog = new AddOlympianDialog(*m_database);
+    dialog->show();
 }
 
 void MainWindow::SearchByName(const std::string& name)

@@ -27,6 +27,7 @@ private slots:
     void OnAddNewButtonClicked();
     void OnDeleteButtonClicked();
     void OnUndoDeleteButtonClicked();
+
 private:
     void SearchByName(const std::string& name);
     void SearchByAge(const std::string& age);

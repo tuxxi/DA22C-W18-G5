@@ -58,6 +58,7 @@ if (QT_GUI)
         src/gui/main.cpp
         src/gui/mainwindow.hpp src/gui/mainwindow.cpp
         src/gui/olympianmodel.hpp src/gui/olympianmodel.cpp
+        src/gui/addolympiandialog.hpp src/gui/addolympiandialog.cpp
     )
     add_executable(DA22C_W18_G5_GUI ${GUI_TYPE} ${PROJECT_SRCS})
 
