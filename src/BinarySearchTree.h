@@ -284,14 +284,8 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_remove(node* nodePtr, 
         success = false;
         return nullptr;
     }
-    //first check if we found the right value
-    if (compare(nodePtr->item, target) == COMPARE_FN::EQUAL_TO)
-    {
-        nodePtr = deleteNode(nodePtr);
-        success = true;
-        --this->count;
-    }
-    else if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
+
+    if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
     {
         nodePtr->leftPtr = _remove(nodePtr->leftPtr, target, success);
     }
@@ -299,10 +293,18 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_remove(node* nodePtr, 
     {
         nodePtr->rightPtr = _remove(nodePtr->rightPtr, target, success);
     }
+    //check if we found the right value
+    else if (compare(nodePtr->item, target) == COMPARE_FN::EQUAL_OBJECT)
+    {
+        nodePtr = deleteNode(nodePtr);
+        success = true;
+        --this->count;
+    }
     else //we didn't find it, we have to keep searching in the right subtree
     {
         nodePtr->rightPtr = _remove(nodePtr->rightPtr, target, success);
     }
+
     return nodePtr;
 }
 //recursive - tries to find all nodes with value equal to target in the tree rooted at nodePtr.

@@ -6,7 +6,8 @@ enum class COMPARE_FN
 {
     LESS_THAN = -1,
     EQUAL_TO = 0,
-    GREATER_THAN = 1
+    GREATER_THAN = 1,
+    EQUAL_OBJECT = 2 //use this if we want to compare the primary key, not a secondary search key
 };
 
 namespace Util

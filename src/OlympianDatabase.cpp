@@ -337,24 +337,25 @@ long int OlympianDatabase::hashFunc(Olympian *const &olympian, long int size)
 }
 COMPARE_FN OlympianDatabase::cmpName(Olympian *const &a, Olympian *const &b)
 {
-    if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_TO;
     if (a->getName() < b->getName()) return COMPARE_FN::LESS_THAN;
-    if (a->getName() > b->getName()) return COMPARE_FN::GREATER_THAN;
-    return COMPARE_FN::EQUAL_TO;
+    else if (a->getName() > b->getName()) return COMPARE_FN::GREATER_THAN;
+    else return COMPARE_FN::EQUAL_TO;
 }
 COMPARE_FN OlympianDatabase::cmpAge(Olympian *const &a, Olympian *const &b)
 {
-    if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_TO;
-    if (a->getAge() < b->getAge()) return COMPARE_FN::LESS_THAN;
-    if (a->getAge() > b->getAge()) return COMPARE_FN::GREATER_THAN;
-    return COMPARE_FN::EQUAL_TO;
+    if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_OBJECT;
+
+    else if (a->getAge() < b->getAge()) return COMPARE_FN::LESS_THAN;
+    else if (a->getAge() > b->getAge()) return COMPARE_FN::GREATER_THAN;
+    else return COMPARE_FN::EQUAL_TO;
 }
 COMPARE_FN OlympianDatabase::cmpHeight(Olympian *const &a, Olympian *const &b)
 {
-    if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_TO;
-    if (a->getHeight() < b->getHeight()) return COMPARE_FN::LESS_THAN;
-    if (a->getHeight() > b->getHeight()) return COMPARE_FN::GREATER_THAN;
-    return COMPARE_FN::EQUAL_TO;
+    if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_OBJECT;
+
+    else if (a->getHeight() < b->getHeight()) return COMPARE_FN::LESS_THAN;
+    else if (a->getHeight() > b->getHeight()) return COMPARE_FN::GREATER_THAN;
+    else return COMPARE_FN::EQUAL_TO;
 }
 
 void OlympianDatabase::printRecord(Olympian *const &olympian, std::ostream &os)
