@@ -25,7 +25,7 @@ set(PROJECT_SRCS
         src/OlympianDatabase.h src/OlympianDatabase.cpp
         src/tests/BSTTest.h src/tests/VectorTest.h src/tests/HashTableTest.h
         src/tests/Tests.cpp
-
+        src/Util.h src/Util.cpp
         src/main.cpp)
 
 #normal executable

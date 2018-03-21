@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include "Util.h"
 
 using namespace std;
 
@@ -10,8 +11,8 @@ static const int SIZE = 256;
 
 
 OlympianDatabase::OlympianDatabase(ifstream &infile)
+    : nRecords(0)
 {
-    hashTable = new HashTable<Olympian*>(SIZE, BUCKET_SIZE, hashFunc, int_cmpName);
     ageBst = new BinarySearchTree<Olympian*>(cmpAge);
     heightBst = new BinarySearchTree<Olympian*>(cmpHeight);
     allRecords = new Vector<Olympian*>;
@@ -175,12 +176,28 @@ bool OlympianDatabase::_buildDatabase(ifstream &infile)
     Olympian *newRecord;
 
     size_t lineNum = 1; //skip first line
-    while ((newRecord = _readRecord(infile, lineNum++)))
-        insert(newRecord);
+    //read all entries into vector
+    while (_readRecord(infile, lineNum++)) {}
+
+    // create hash table based on the prime nearest to double the number of entries
+    int size = Util::Primes.getNearestPrime(2 * nRecords);
+    hashTable = new HashTable<Olympian*>(size, BUCKET_SIZE, hashFunc, int_cmpName);
+
+#ifdef _DEBUG
+    cout << "Hash table size was << " << nRecords << endl;
+#endif
+
+    //insert the records into the data structures
+    //this is only O(2 * n) so this is fine, and it allows us to control
+    //the initial hash table size without rehashing a lot
+    for (auto oly : *allRecords)
+    {
+        insert(oly);
+    }
     return true;
 }
 
-Olympian *OlympianDatabase::_readRecord(std::ifstream &infile, size_t lineNum)
+bool OlympianDatabase::_readRecord(std::ifstream &infile, size_t lineNum)
 {
     //seek to the given line num
     infile.seekg(std::ios::beg);
@@ -251,12 +268,12 @@ Olympian *OlympianDatabase::_readRecord(std::ifstream &infile, size_t lineNum)
 
             auto newEntry = new Olympian(fullname, sport, state, gender[0], age, height, nGold, nSilver, nBronze);
             allRecords->add(newEntry);
-            return newEntry;
+            nRecords++;
+            return true;
         }
     }
     //EOF or malformed line
-    return nullptr;
-
+    return false;
 }
 
 bool OlympianDatabase::insert(Olympian *newRecord)
@@ -341,7 +358,6 @@ COMPARE_FN OlympianDatabase::cmpHeight(Olympian *const &a, Olympian *const &b)
 }
 int OlympianDatabase::int_cmpName(Olympian *const &a, Olympian *const &b)
 {
-    //this is reversed so the alphabetical order is preserved
     return int(cmpName(a, b));
 }
 

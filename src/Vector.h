@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <cstring>
-
+#include <stdexcept>
 template<class T>
 class Vector
 {

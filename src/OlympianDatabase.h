@@ -23,7 +23,7 @@ private:
     Vector<Olympian*> *allRecords;
 
     bool _buildDatabase(std::ifstream&);
-    Olympian *_readRecord(std::ifstream&, size_t);
+    bool _readRecord(std::ifstream &, size_t);
     static long hashFunc(Olympian *const &olympian, long int size);
 
     static COMPARE_FN cmpName(Olympian *const &, Olympian *const &);
@@ -33,8 +33,7 @@ private:
     static void printOlympian(Olympian*&);
 
 public:
-    OlympianDatabase(std::ifstream&);
-
+    explicit OlympianDatabase(std::ifstream&);
     ~OlympianDatabase();
 
     int getnRecords() { return nRecords; }
