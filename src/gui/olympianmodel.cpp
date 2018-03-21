@@ -12,8 +12,7 @@ OlympianTableModel::OlympianTableModel(OlympianDatabase& database, QObject *pare
 int OlympianTableModel::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    return OlympianDatabase::allRecords->size();
-
+    return int(currentDisplay.size());
 }
 
 int OlympianTableModel::columnCount(const QModelIndex& parent) const
@@ -100,20 +99,32 @@ bool OlympianTableModel::removeRows(int row, int count, const QModelIndex& paren
 }
 void OlympianTableModel::setSortByAge()
 {
+    beginResetModel();
     currentDisplay.clear();
     //traverse age BST in order to reorder the data that's being displayed
     OlympianDatabase::ageBst->insertInorder(currentDisplay);
+    endResetModel();
 }
 
 void OlympianTableModel::setSortByHeight()
 {
+    beginResetModel();
     currentDisplay.clear();
     //traverse age BST in order to reorder the data that's being displayed
     OlympianDatabase::heightBst->insertInorder(currentDisplay);
+    endResetModel();
 }
 
 void OlympianTableModel::setSortByName()
 {
+    beginResetModel();
     currentDisplay.clear();
     OlympianDatabase::alphabeticalOrderList->insertToVector(currentDisplay);
+    endResetModel();
+}
+void OlympianTableModel::resetModel(Vector<Olympian *> &vec)
+{
+    beginResetModel();
+    currentDisplay = vec;
+    endResetModel();
 }

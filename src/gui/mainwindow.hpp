@@ -1,6 +1,9 @@
 #pragma once
 #include <QMainWindow>
 #include <QTableView>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QComboBox>
 
 #include <memory>
 
@@ -14,9 +17,17 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
     void ReadFile();
+private slots:
+    void OnSearchButtonClicked();
 private:
-    void SetupUi();
+    void SearchByName(const std::string& name);
+    void SearchByAge(const std::string& age);
+    void SearchByHeight(const std::string& height);
 
+    void SetupUi();
+    QComboBox* searchTypeCBox;
+    QLineEdit* searchLine;
+    QPushButton* searchBtn;
     OlympianTableModel* model;
     QStatusBar* statusBar;
     QTableView* tableView;

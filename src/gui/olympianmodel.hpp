@@ -16,12 +16,13 @@ public:
     bool insertRows(int row, int count, const QModelIndex& parent) override;
     bool removeRows(int row, int count, const QModelIndex& parent) override;
 
+    void resetModel(Vector<Olympian*>& vec);
     void setSortByAge();
     void setSortByHeight();
     void setSortByName();
-    Vector<Olympian*> currentDisplay;
 
 private:
+    Vector<Olympian*> currentDisplay;
 
     static const int NUM_COLUMNS = 9;
 };

@@ -15,6 +15,8 @@ public:
     T& operator[](size_t idx) const;
     T& at(size_t idx) const throw();
 
+    bool operator=(const Vector<T> &other);
+
     void add(const T& item);
     bool reserve(size_t size);
     bool remove(size_t idx);
@@ -142,6 +144,14 @@ template<class T>
 size_t Vector<T>::size() const
 {
     return m_count;
+}
+template<class T>
+bool Vector<T>::operator=(const Vector<T> &other)
+{
+    std::memcpy(m_array, other.m_array, m_arraySize * sizeof(T));
+    this->m_arraySize = other.m_arraySize;
+    this->m_count = other.m_count;
+    return true;
 }
 template<class T>
 std::ostream& operator<<(std::ostream& str, Vector<T>& vec)
