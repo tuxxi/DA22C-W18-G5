@@ -14,7 +14,7 @@ OlympianDatabase::OlympianDatabase(ifstream &infile)
     : nRecords(1)
 {
     // create hash table based on the prime nearest to double the number of entries
-    int size = Util::Primes.getNearestPrime(2 * SIZE);
+    int size = Util::Primes.getNearestPrime(SIZE);
 
     hashTable = new HashTable<Olympian*>(size, BUCKET_SIZE, hashFunc, cmpName);
     ageBst = new BinarySearchTree<Olympian*>(cmpAge);
