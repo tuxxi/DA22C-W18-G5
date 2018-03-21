@@ -18,8 +18,11 @@ private:
     int *nFilled;
     LinkedList<T> *overflowArea;
 
-    long int (*_hash)(const T&, long int);
-    COMPARE_FN (*cmp)(const T&, const T&);
+    typedef long int (*hashFn)(const T&, long int);
+    hashFn _hash;
+
+    typedef COMPARE_FN (*cmpFn)(const T&, const T&);
+    cmpFn cmp;
 
     bool _insert(const T&);
     bool _insertOverflow(const T&);
@@ -30,7 +33,7 @@ private:
     void _deleteTable(T**, bool**, long int);
 
 public:
-    HashTable(long int, int, long int (*)(const T&, long int), COMPARE_FN (*)(const T&, const T&));
+    HashTable(long int, int, hashFn, cmpFn);
 
     ~HashTable();
 
@@ -45,8 +48,7 @@ public:
 };
 
 template <class T>
-HashTable<T>::HashTable(long int tableSize, int bucketSize,
-    long int(*hash)(const T&, long int), COMPARE_FN (*cmp)(const T&, const T&))
+HashTable<T>::HashTable(long int tableSize, int bucketSize, hashFn hash, cmpFn cmp)
 {
     this->tableSize = tableSize;
     this->bucketSize = bucketSize;

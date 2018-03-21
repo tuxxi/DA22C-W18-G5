@@ -2,6 +2,7 @@
 #define LINKED_LIST_H
 
 #include <iostream>
+#include "Util.h"
 
 template <class T>
 class ListNode
@@ -27,14 +28,14 @@ class LinkedList
 private:
     int count;
     ListNode<T> *head;
-    COMPARE_FN (*cmp)(const T&, const T&);
-
+    typedef COMPARE_FN (*cmpFn)(const T&, const T&);
+    cmpFn cmp;
 public:
-    LinkedList(COMPARE_FN  (*)(const T&, const T&));
+    LinkedList(cmpFn);
 
     ~LinkedList();
 
-    int getCount() { return count; }
+    int getCount() const { return count; }
     void displayList();
     bool insert(const T&);
     bool remove(const T&);
@@ -44,7 +45,8 @@ public:
 };
 
 template <class T>
-LinkedList<T>::LinkedList(COMPARE_FN  (*cmp)(const T&, const T&))
+LinkedList<T>::LinkedList(cmpFn cmp)
+    : count(0)
 {
     this->head = new ListNode<T>;
     this->cmp = cmp;

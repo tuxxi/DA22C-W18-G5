@@ -7,8 +7,8 @@
 #include "BinarySearchTree.h"
 #include "Stack.h"
 #include "Vector.h"
-#include "CompareFunction.h"
 #include "HashTable.h"
+#include "Util.h"
 
 class OlympianDatabase {
 

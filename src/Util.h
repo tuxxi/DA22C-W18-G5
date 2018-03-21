@@ -1,6 +1,14 @@
 #pragma once
 
 #include "Vector.h"
+
+enum class COMPARE_FN
+{
+    LESS_THAN = -1,
+    EQUAL_TO = 0,
+    GREATER_THAN = 1
+};
+
 namespace Util
 {
     class PrimeNumbers

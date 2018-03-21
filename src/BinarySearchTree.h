@@ -6,14 +6,16 @@
 #pragma once
 
 #include "Vector.h"
-#include "CompareFunction.h"
+#include "Util.h"
 
 template<class T>
 class BinarySearchTree
 {
 public:
+    typedef COMPARE_FN(*cmpFn)(const T&, const T&);
+
     // "admin" functions
-    explicit BinarySearchTree(COMPARE_FN (*fn)(const T&, const T&));
+    explicit BinarySearchTree(cmpFn fn);
     virtual ~BinarySearchTree();
 
     //copy constructor
@@ -57,7 +59,8 @@ private:
     };
     typedef typename BinarySearchTree<T>::BinaryNode node;
 
-    COMPARE_FN (*compare)(const T&, const T&); //function pointer to a compare function for T
+    cmpFn compare;
+
     unsigned int count;
     node* rootPtr;
 
@@ -94,7 +97,7 @@ private:
 
 //default ctor
 template <class T>
-BinarySearchTree<T>::BinarySearchTree(COMPARE_FN (*fn)(const T&, const T&))
+BinarySearchTree<T>::BinarySearchTree(cmpFn fn)
         : rootPtr(nullptr), count(0), compare(fn)
 {}
 
