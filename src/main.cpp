@@ -9,6 +9,9 @@
 #include <string>
 #include "OlympianDatabase.h"
 
+#define DEFAULT_INFILE "winter-olympics.csv"
+#define DEFAULT_OUTFILE "winter-olympics-out.csv"
+
 using namespace std;
 
 ifstream getCmndLineInfile(int, const char *[]);
@@ -36,7 +39,7 @@ int main(int argc, const char * argv[])
     }
     else //default file jic
     {
-        infile = ifstream("winter-olympians.csv");
+        infile = ifstream(DEFAULT_INFILE);
     }
 
     if (!infile) return -1;
@@ -50,8 +53,7 @@ int main(int argc, const char * argv[])
         displayMenu();
     }
 
-    ofstream outfile;
-    olympianDatabase.saveDatabase(outfile);
+    olympianDatabase.saveDatabase(DEFAULT_OUTFILE);
 
     return 0;
 }

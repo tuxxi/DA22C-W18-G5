@@ -7,17 +7,22 @@
 using namespace std;
 
 static const int BUCKET_SIZE = 3;
-static const int SIZE = 256;
+static const int SIZE = 512;
 
 
 OlympianDatabase::OlympianDatabase(ifstream &infile)
-    : nRecords(0)
+    : nRecords(SIZE)
 {
+    // create hash table based on the prime nearest to double the number of entries
+    int size = Util::Primes.getNearestPrime(2 * nRecords);
+
+    hashTable = new HashTable<Olympian*>(size, BUCKET_SIZE, hashFunc, cmpName);
     ageBst = new BinarySearchTree<Olympian*>(cmpAge);
     heightBst = new BinarySearchTree<Olympian*>(cmpHeight);
     allRecords = new Vector<Olympian*>;
     deletionStack = new Stack<Olympian*>;
-    alphabeticalOrderList = new LinkedList<Olympian*>(int_cmpName);
+    alphabeticalOrderList = new LinkedList<Olympian*>(cmpName);
+
     _buildDatabase(infile);
 }
 
@@ -166,20 +171,30 @@ void OlympianDatabase::displayAlphabeticalOrder()
     alphabeticalOrderList->displayList();
 }
 
-void OlympianDatabase::saveDatabase(std::ofstream&)
+bool OlympianDatabase::saveDatabase(std::string outfileName)
 {
-    //TODO: save to file
+    ofstream outfile(outfileName);
+
+    if (!outfile)
+        cerr << "\nError saving database. The file " << outfileName << " could not be opened\n";
+
+    for (auto item : *allRecords)
+        outfile << item->getName() << "," << item->getSport() << "," << item->getState() << ","
+                << item->getAge() << "," << "," << item->getHeight() << "," << item->getGender()
+                << item->getnGold() << "," << "," << item->getnSilver() << "," << item->getnBronze() << endl;
+
+    outfile.close();
 }
 
 bool OlympianDatabase::_buildDatabase(ifstream &infile)
 {
-    size_t lineNum = 1; //skip first line
-    //read all entries into vector
-    while (_readRecord(infile, lineNum++)) {}
+    /*size_t lineNum = 1; //skip first line
+    //read all entries into vector*/
+    Olympian *newRecord;
 
-    // create hash table based on the prime nearest to double the number of entries
-    int size = Util::Primes.getNearestPrime(2 * nRecords);
-    hashTable = new HashTable<Olympian*>(size, BUCKET_SIZE, hashFunc, int_cmpName);
+    while ((newRecord = _readRecord(infile)))
+        insert(newRecord);
+
 
 #ifdef _DEBUG
     cout << "Hash table size was << " << nRecords << endl;
@@ -188,110 +203,79 @@ bool OlympianDatabase::_buildDatabase(ifstream &infile)
     //insert the records into the data structures
     //this is only O(2 * n) so this is fine, and it allows us to control
     //the initial hash table size without rehashing a lot
-    for (auto oly : *allRecords)
+    /*for (auto oly : *allRecords)
     {
         insert(oly);
-    }
+    }*/
     return true;
 }
 
-bool OlympianDatabase::_readRecord(std::ifstream &infile, size_t lineNum)
+Olympian *OlympianDatabase::_readRecord(std::ifstream &infile)
 {
-    //seek to the given line num
+    /*//seek to the given line num
     infile.seekg(std::ios::beg);
     for (int i = 0; i < lineNum; ++i) {
         infile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-    string input, firstName, lastName, sport, gender;
-    int nGold, nSilver, nBronze;
+    }*/
+    string input, name, sport, state, gender, goldStr;
+    int age, height, nGold, nSilver, nBronze;
 
-    while(getline(infile, firstName, ','))
+    getline(infile, name, ',');
+
+    if (name.length())
     {
-        if (firstName.length())
-        {
-            getline(infile, lastName, ',');
-            getline(infile, gender, ',');
-            getline(infile, sport, ',');
-            getline(infile, input, ',');
+        getline(infile, sport, ',');
+        getline(infile, state, ',');
+        getline(infile, input, ',');
+        age = stoi(input);
+        getline(infile, input, ',');
+        height = stoi(input);
+        getline(infile, gender, ',');
+        getline(infile, input, ',');
+        nGold = stoi(input);
+        getline(infile, input, ',');
+        nSilver = stoi(input);
+        getline(infile, input);
+        nBronze = stoi(input);
 
-            if (input.find('"') != string::npos)
-            {
-                getline(infile, input, '"');
-                getline(infile, input, ',');
-                getline(infile, input, ',');
-            }
-            else
-                (getline(infile, input, ','));
 
-            if (input.find('"') != string::npos)
-            {
-                getline(infile, input, '"');
-                getline(infile, input, ',');
-            }
-
-            getline(infile, input, ',');
-            if (isdigit(input[0]))
-                nGold = stoi(input);
-            else
-                nGold = 0;
-            getline(infile, input, ',');
-            if (isdigit(input[0]))
-                nSilver = stoi(input);
-            else
-                nSilver = 0;
-            getline(infile, input, ',');
-            if (isdigit(input[0]))
-                nBronze = stoi(input);
-            else
-                nBronze = 0;
-
-            getline(infile, input, '"');
-            getline(infile, input, '\'');
-            int height = 12 * stoi(input);
-            getline(infile, input, '"');
-            height += stoi(input);
-
-            for (int i = 0; i < 5; i++)
-                getline(infile, input, ',');
-            int age = stoi(input);
-
-            getline(infile, input, ',');
-            getline(infile, input, ',');
-            string state = input;
 
 #ifdef _DEBUG
-            cout << lastName + ", " << firstName << ": " << gender << "; " << sport << "; "<< height << ", " << age << "; " << state << endl;
+        cout << lastName + ", " << firstName << ": " << gender << "; " << sport << "; "<< height << ", " << age << "; " << state << endl;
 #endif
-            string fullname = firstName + " " + lastName;
 
-            auto newEntry = new Olympian(fullname, sport, state, gender[0], age, height, nGold, nSilver, nBronze);
-            allRecords->add(newEntry);
-            nRecords++;
-            return true;
-        }
+        auto newEntry = new Olympian(name, sport, state, gender[0], age, height, nGold, nSilver, nBronze);
+        //allRecords->add(newEntry);
+        //nRecords++;
+
+        return newEntry;
     }
+
     //EOF or malformed line
-    return false;
+    return nullptr;
 }
 
-bool OlympianDatabase::insert(Olympian *newRecord)
+bool OlympianDatabase::insert(Olympian *newEntry)
 {
     //insert into hash table first.
-    if (!hashTable->insert(newRecord)) return false;
+    if (!hashTable->insert(newEntry)) return false;
 
     bool success = true;
-    if (!ageBst->insert(newRecord)) success = false;
-    if (!heightBst->insert(newRecord)) success = false;
-    if (!alphabeticalOrderList->insert(newRecord)) success = false;
+    if (!ageBst->insert(newEntry)) success = false;
+    if (!heightBst->insert(newEntry)) success = false;
+    if (!alphabeticalOrderList->insert(newEntry)) success = false;
 
     if (!success)
     {
-        ageBst->remove(newRecord);
-        heightBst->remove(newRecord);
-        hashTable->remove(newRecord);
-        alphabeticalOrderList->remove(newRecord);
+        ageBst->remove(newEntry);
+        heightBst->remove(newEntry);
+        hashTable->remove(newEntry);
+        alphabeticalOrderList->remove(newEntry);
         return false;
     }
+
+    allRecords->add(newEntry);
+    nRecords++;
 
     return true;
 }
@@ -303,7 +287,6 @@ bool OlympianDatabase::remove(string name)
     foundRecord->setName(std::move(name));
     //try to find the record first, and stop if we can't find it
     if (!hashTable->search(foundRecord)) return false;
-
     bool success = true;
     if (!hashTable->remove(foundRecord)) success = false;
     if (!ageBst->remove(foundRecord)) success = false;

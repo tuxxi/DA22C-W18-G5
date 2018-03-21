@@ -27,10 +27,10 @@ class LinkedList
 private:
     int count;
     ListNode<T> *head;
-    int (*cmp)(const T&, const T&);
+    COMPARE_FN (*cmp)(const T&, const T&);
 
 public:
-    LinkedList(int(*)(const T&, const T&));
+    LinkedList(COMPARE_FN  (*)(const T&, const T&));
 
     ~LinkedList();
 
@@ -42,7 +42,7 @@ public:
 };
 
 template <class T>
-LinkedList<T>::LinkedList(int(*cmp)(const T&, const T&))
+LinkedList<T>::LinkedList(COMPARE_FN  (*cmp)(const T&, const T&))
 {
     this->head = new ListNode<T>;
     this->cmp = cmp;
@@ -65,13 +65,13 @@ bool LinkedList<T>::insert(const T &newData)
 {
     ListNode<T> *prev = head, *curr = head->getNext(), *newNode;
 
-    while (curr && cmp(curr->getData(), newData) < 0)
+    while (curr && cmp(curr->getData(), newData) == COMPARE_FN::LESS_THAN)
     {
         prev = curr;
         curr = curr->getNext();
     }
 
-    if (curr && !cmp(curr->getData(), newData))
+    if (curr && cmp(curr->getData(), newData) == COMPARE_FN::EQUAL_TO)
         return false;
 
     newNode = new ListNode<T>(newData);
@@ -87,20 +87,22 @@ bool LinkedList<T>::remove(const T &removalKey)
 {
     ListNode<T> *prev = head, *curr = head->getNext();
 
-    while (curr && cmp(curr->getData(), removalKey) < 0)
+    while (curr && cmp(curr->getData(), removalKey) == COMPARE_FN::LESS_THAN)
     {
         prev = curr;
         curr = curr->getNext();
     }
 
-    if (!curr || cmp(curr->getData(), removalKey) != 0)
-        return false;
+    if (curr && cmp(curr->getData(), removalKey) == COMPARE_FN::EQUAL_TO)
+    {
+        prev->setNext(curr->getNext());
+        delete curr;
+        count--;
 
-    prev->setNext(curr->getNext());
-    delete curr;
-    count--;
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 template <class T>
@@ -108,10 +110,10 @@ bool LinkedList<T>::search(T &searchKey)
 {
     ListNode<T> *curr = head->getNext();
 
-    while (curr && cmp(curr->getData(), searchKey) > 0)
+    while (curr && cmp(curr->getData(), searchKey) == COMPARE_FN::LESS_THAN)
         curr = curr->getNext();
 
-    if (!curr || cmp(curr->getData(), searchKey))
+    if (!curr || cmp(curr->getData(), searchKey) != COMPARE_FN::EQUAL_TO)
         return false;
 
     searchKey = curr->getData();

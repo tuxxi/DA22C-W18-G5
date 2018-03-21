@@ -23,7 +23,7 @@ private:
     Vector<Olympian*> *allRecords;
 
     bool _buildDatabase(std::ifstream&);
-    bool _readRecord(std::ifstream &, size_t);
+    Olympian *_readRecord(std::ifstream&);
     static long hashFunc(Olympian *const &olympian, long int size);
 
     static COMPARE_FN cmpName(Olympian *const &, Olympian *const &);
@@ -57,7 +57,7 @@ public:
     void displayAgeTree();
     void displayHeightTree();
     void displayHashStats();
-    void saveDatabase(std::ofstream&);
+    bool saveDatabase(std::string);
 };
 
 

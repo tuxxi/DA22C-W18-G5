@@ -18,8 +18,8 @@ private:
     int *nFilled;
     LinkedList<T> *overflowArea;
 
-    long int(*_hash)(const T&, long int);
-    int(*cmp)(const T&, const T&);
+    long int (*_hash)(const T&, long int);
+    COMPARE_FN (*cmp)(const T&, const T&);
 
     bool _insert(const T&);
     bool _insertOverflow(const T&);
@@ -30,7 +30,7 @@ private:
     void _deleteTable(T**, bool**, long int);
 
 public:
-    HashTable(long int, int, long int(*)(const T&, long int), int(*)(const T&, const T&));
+    HashTable(long int, int, long int (*)(const T&, long int), COMPARE_FN (*)(const T&, const T&));
 
     ~HashTable();
 
@@ -46,7 +46,7 @@ public:
 
 template <class T>
 HashTable<T>::HashTable(long int tableSize, int bucketSize,
-    long int(*hash)(const T&, long int), int(*cmp)(const T&, const T&))
+    long int(*hash)(const T&, long int), COMPARE_FN (*cmp)(const T&, const T&))
 {
     this->tableSize = tableSize;
     this->bucketSize = bucketSize;
@@ -140,7 +140,7 @@ template <class T>
 bool HashTable<T>::_checkDuplicate(const T &newData, long int hashVal)
 {
     for (int i = 0; i < bucketSize; i++)
-        if (isFilled[hashVal][i] && !cmp(newData, table[hashVal][i]))
+        if (isFilled[hashVal][i] && cmp(newData, table[hashVal][i]) == COMPARE_FN::EQUAL_TO)
             return true;
 
     return false;
@@ -153,7 +153,7 @@ bool HashTable<T>::_remove(const T &removalKey)
 
     if (table[hashVal])
         for (int i = 0; i < bucketSize; i++)
-            if (isFilled[hashVal][i] && !cmp(table[hashVal][i], removalKey))
+            if (isFilled[hashVal][i] && cmp(table[hashVal][i], removalKey) == COMPARE_FN::EQUAL_TO)
             {
                 table[hashVal][i] = T();
                 isFilled[hashVal][i] = false;
@@ -179,7 +179,7 @@ bool HashTable<T>::_search(T &searchObj)
 
     if (table[hashVal])
         for (int i = 0; i < bucketSize; i++)
-            if (isFilled[hashVal][i] && !cmp(searchObj, table[hashVal][i]))
+            if (isFilled[hashVal][i] && cmp(searchObj, table[hashVal][i]) == COMPARE_FN::EQUAL_TO)
             {
                 searchObj = table[hashVal][i];
                 return true;

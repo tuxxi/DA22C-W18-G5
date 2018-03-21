@@ -34,7 +34,7 @@ public:
     std::string getName() const { return name; }
     std::string getSport() const { return sport; }
     std::string getState() const { return state; }
-    char setGender() const { return gender; }
+    char getGender() const { return gender; }
     int getAge() const { return age; }
     int getHeight() const { return height; }
     int getnGold() const { return nGold; }
