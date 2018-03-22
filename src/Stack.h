@@ -1,3 +1,7 @@
+// Specification file for the stack class
+//
+// Created by Fan Yang on 3//12//2018
+
 #ifndef STACK_H
 #define STACK_H
 

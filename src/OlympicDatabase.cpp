@@ -1,4 +1,7 @@
 // Implementation file for the OlympicDatabase class
+//
+// Created by Alexander Langley on 25 February, 2018
+//
 
 #include "OlympicDatabase.h"
 

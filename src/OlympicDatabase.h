@@ -1,4 +1,7 @@
 // Specification file for the OlympicDatabase class
+//
+// Created by Alexander Langley on 25 February, 2018
+//
 
 #ifndef OLYMPIAN_DATABASE_H
 #define OLYMPIAN_DATABASE_H

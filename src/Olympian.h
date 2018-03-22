@@ -1,4 +1,7 @@
 // Specification file for the Olympian class
+//
+// Created by Alexander Langley on 17 Februrary, 2018
+//
 
 #ifndef OLYMPIAN_H
 #define OLYMPIAN_H

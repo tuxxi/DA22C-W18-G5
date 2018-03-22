@@ -1,3 +1,8 @@
+// Specification file for the Vector class
+//
+// Created by tuxxi on 3/14/18
+//
+
 #pragma once
 
 #include <algorithm>

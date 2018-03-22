@@ -1,4 +1,7 @@
 // Specification file for the LinkedList and ListNode template classes
+//
+// Created by Alexander Langley on 20 March, 2018
+//
 
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H

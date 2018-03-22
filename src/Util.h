@@ -1,4 +1,7 @@
 // This fle contains utilities for generating prime numbers, used in the hash table resizing.
+//
+// Created by tuxxi on 3/20/18
+//
 
 #pragma once
 

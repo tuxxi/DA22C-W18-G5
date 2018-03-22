@@ -1,3 +1,8 @@
+// Specification file for the HashTable class
+//
+// Created by Alexander Langley on 20 March, 2018
+//
+
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
@@ -29,13 +34,12 @@ private:
 
     bool _insert(const T&);
     bool _insertOverflow(const T&);
+    bool _remove(const T&);
     bool _removeOverflow(const T&);
+    bool _search(T&);
     bool _searchOverflow(T&);
     bool _checkDuplicate(const T&, long int);
-    bool _remove(const T&);
-    bool _search(T&);
     bool _resize(long int);
-    void _deleteTable(T**, bool**, int*, Vector<T>*, long int);
 
 public:
     HashTable(long int, int, hashFn, cmpFn, int nResizes = 0);
