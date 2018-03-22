@@ -510,7 +510,7 @@ bool validateState(string state)
 
 string formatState(string state)
 {
-    state[0] == toupper(state[0]);
+    state[0] = toupper(state[0]);
     state[1] = toupper(state[1]);
 
     return state;

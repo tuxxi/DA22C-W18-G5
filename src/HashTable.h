@@ -3,14 +3,15 @@
 
 #include "Vector.h"
 #include "Stack.h"
+#include "Util.h"
 
-#define MAX_COLLISIONS 15
+#define MAX_LOAD_FACTOR 0.6
 
 template <class T>
 class HashTable
 {
 private:
-    int tableSize;
+    long int tableSize;
     int bucketSize;
     int tableSpacesFilled;
     int nCollisions;
@@ -32,8 +33,8 @@ private:
     bool _checkDuplicate(const T&, long int);
     bool _remove(const T&);
     bool _search(T&);
-    bool _resize();
-    void _deleteTable(T**, bool**, long int);
+    bool _resize(long int);
+    void _deleteTable(T**, bool**, int*, Vector<T>*, long int);
 
 public:
     HashTable(long int, int, hashFn, cmpFn);
@@ -68,7 +69,18 @@ HashTable<T>::HashTable(long int tableSize, int bucketSize, hashFn hash, cmpFn c
 template <class T>
 bool HashTable<T>::insert(const T &newData)
 {
-    return _insert(newData);
+    if (!_insert(newData))
+        return false;
+
+    if (this->getLoadFactor() >= MAX_LOAD_FACTOR)
+    {
+        int newSize = tableSize * 2;
+
+        while (!_resize(Util::Primes.getNearestPrime(newSize)))
+            newSize *= 2;
+    }
+
+    return true;
 }
 
 template <class T>
@@ -131,9 +143,6 @@ bool HashTable<T>::_insertOverflow(const T &newData)
     if (overflowArea->add(newData))
     {
         nCollisions++;
-
-        /*if (overflowArea->getCount() >= MAX_COLLISIONS)
-        _resize();*/
 
         return true;
     }
@@ -225,41 +234,39 @@ bool HashTable<T>::_search(T &searchObj)
     return false;
 }
 
-//template <class T>
-/*bool HashTable<T>::_resize()
+template <class T>
+bool HashTable<T>::_resize(long int newSize)
 {
-    T **oldTable = table;
-    bool **oldIsFilled = isFilled;
-    int *oldnFilled = nFilled;
-
-    table = new T*[tableSize * 2] {nullptr};
-    isFilled = new bool*[tableSize * 2] {nullptr};
-    nFilled =
+    HashTable<T> *newHashTable = new HashTable<T>(newSize, bucketSize, _hash, cmp);
 
     for (int i = 0; i < tableSize; i++)
-        if (oldTable[i])
+        if (table[i])
             for (int j = 0; j < bucketSize; j++)
-                if (oldIsFilled[i][j])
-                    if (!_insert(oldTable[i][j]) && !_insertOverflow(oldTable[i][j]))
+                if (isFilled[i][j])
+                    if (!newHashTable->_insert(table[i][j]) && !newHashTable->_insertOverflow(table[i][j])
+                        || newHashTable->getLoadFactor() >= MAX_LOAD_FACTOR)
                     {
-                        std::cerr << "\n[ERROR]: There was a problem resizing the hash table.\n\n";
-
-                        _deleteTable(table, isFilled, tableSize * 2);
-
-                        table = oldTable;
-                        isFilled = oldIsFilled;
+                        delete newHashTable;
 
                         return false;
                     }
 
-    _deleteTable(oldTable, oldIsFilled, tableSize);
-    tableSize *= 2;
+    for (auto item : *overflowArea)
+        if (!newHashTable->_insert(item) && !newHashTable->_insertOverflow(item)
+            || newHashTable->getLoadFactor() >= MAX_LOAD_FACTOR)
+        {
+            delete newHashTable;
+
+            return false;
+        }
+
+    *this = *newHashTable;
 
     return true;
-}*/
+}
 
 template <class T>
-void HashTable<T>::_deleteTable(T **table, bool **isFilled, long int tableSize)
+void HashTable<T>::_deleteTable(T **table, bool **isFilled, int *nFilled, Vector<T> *overflowArea, long int tableSize)
 {
     T **ptr1 = table;
     bool **ptr2 = isFilled;
@@ -275,6 +282,9 @@ void HashTable<T>::_deleteTable(T **table, bool **isFilled, long int tableSize)
         ptr1++;
         ptr2++;
     }
+
+    delete nFilled;
+    delete overflowArea;
 }
 
 template <class T>
@@ -283,7 +293,20 @@ HashTable<T>::~HashTable()
     T **ptr1 = table;
     bool **ptr2 = isFilled;
 
-    _deleteTable(table, isFilled, tableSize);
+    while (ptr1 < table + tableSize)
+    {
+        if (*ptr1)
+        {
+            delete *ptr1;
+            delete *ptr2;
+        }
+
+        ptr1++;
+        ptr2++;
+    }
+
+    delete nFilled;
+    delete overflowArea;
 }
 
 #endif // HASH_TABLE_H
