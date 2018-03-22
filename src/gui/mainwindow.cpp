@@ -106,12 +106,12 @@ void MainWindow::SetupUi()
     sortLayout->addRow(hSort);
     auto gbSort = new QGroupBox(tr("Display all and sort"));
     gbSort->setLayout(sortLayout);
-    auto snsFrame = new QFrame;
-    auto vSearchAndSort = new QVBoxLayout;
-    vSearchAndSort->addWidget(gbSearch);
-    vSearchAndSort->addWidget(gbSort);
-    snsFrame->setLayout(vSearchAndSort);
-    m_tabWidget->addTab(snsFrame, "Search / Sort");
+    auto displayFrame = new QFrame;
+    auto vDisplayLayout = new QVBoxLayout;
+    vDisplayLayout->addWidget(gbSearch);
+    vDisplayLayout->addWidget(gbSort);
+    displayFrame->setLayout(vDisplayLayout);
+    m_tabWidget->addTab(displayFrame, "Display");
 
     /*
      * Edit

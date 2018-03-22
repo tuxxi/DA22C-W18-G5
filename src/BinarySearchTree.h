@@ -12,30 +12,42 @@ template<class T>
 class BinarySearchTree
 {
 public:
-    typedef COMPARE_FN(*cmpFn)(const T&, const T&);
+    typedef COMPARE_FN(*cmpFn)(const T&, const T&); //typdef for signature of compare function
     
-    // "admin" functions
     explicit BinarySearchTree(cmpFn fn);
     virtual ~BinarySearchTree();
     
     //copy constructor
     BinarySearchTree(const BinarySearchTree<T>& tree);
-    
     //copy assignment operator
     BinarySearchTree& operator= (const BinarySearchTree& sourceTree);
     //operator<< that outputs an indented list using recursive print function
     template<class C>
     friend std::ostream& operator<<(std::ostream& stream, const BinarySearchTree<C>& other);
-    
+
+    /** @brief checks if tree is empty
+     * @return true if tree is empty, false if not
+     */
     bool empty() const { return count == 0; }
+    /** @brief the total size of the tree
+     */
     int size() const { return count; }
+    /** @brief clears out data in tree and resets it to default state
+     */
     void clear() { _destroy(rootPtr); rootPtr = nullptr; count = 0; }
-    
-    // insert a node at the correct location
+
+    /** @brief insert a new node into the tree
+     * @return false if failed, true if success
+     */
     bool insert(const T& newEntry);
-    // remove a node if found
+    /** @brief tries to remove a node with search key @param anEntry
+     * @return true if the node was removed
+     */
     bool remove(const T& anEntry);
-    // find a target node
+    /** @brief searches for all entries which match @param target
+     * @param results a vector of items that returned COMPARE_FN::EQUAL_TO with the target
+     * @return true if anything at all was found, false if no entries
+     */
     bool findAllEntries(const T& target, Vector<T>& results) const;
     // find the smallest node
     T& findSmallest() const;
@@ -43,13 +55,14 @@ public:
     T& findLargest() const;
     //print indended
     void printIndented(void visit(const T&, const int level)) const { _preorder(visit, rootPtr, 0); }
-
-    
+    /** @brief insert items inorder into a vector, allowing us to process them later
+     * @param v the vector to insert items into
+     */
     void insertInorder(Vector<T>& v);
 private:
     struct BinaryNode
     {
-        T item;                 // Data portion
+        T item;                 // Data
         BinaryNode* leftPtr;	// Pointer to left child
         BinaryNode* rightPtr;   // Pointer to right child
         
@@ -82,9 +95,12 @@ private:
     node* _insert(node* nodePtr, node* newNode);
     //internal remove node: locate and delete target node under nodePtr subtree
     node* _remove(node* nodePtr, const T& target, bool& success);
-    
+
+    //internal search for target node
     bool _find(node *treePtr, const T &target, Vector<T>& results) const;
+    //internal recurse for smallest
     T& _smallest(node *nodePtr) const;
+    //internal recurse for largest
     T& _largest(node* nodePtr) const;
     
     // internal traverse for copy
