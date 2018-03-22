@@ -1,3 +1,5 @@
+// Specification file for the OlympicDatabase class
+
 #ifndef OLYMPIAN_DATABASE_H
 #define OLYMPIAN_DATABASE_H
 
@@ -18,6 +20,7 @@ class OlympicDatabase
 protected:
     int nRecords;
 
+    // Pointers to various data structures
     HashTable<Olympian*> *hashTable;
     BinarySearchTree<Olympian*> *ageBst;
     BinarySearchTree<Olympian*> *heightBst;
@@ -42,9 +45,11 @@ protected:
     static void _printHeightIndented(Olympian *const &, const int);
 
 public:
+    // Constructor and destructor
     explicit OlympicDatabase(std::ifstream&);
     ~OlympicDatabase();
 
+    // Return the total number of records in the database
     int getnRecords() const { return nRecords; }
 
     bool insert(Olympian*);

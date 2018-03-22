@@ -1,3 +1,5 @@
+// This fle contains utilities for generating prime numbers, used in the hash table resizing.
+
 #pragma once
 
 #include "Vector.h"

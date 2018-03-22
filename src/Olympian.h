@@ -1,3 +1,5 @@
+// Specification file for the Olympian class
+
 #ifndef OLYMPIAN_H
 #define OLYMPIAN_H
 
