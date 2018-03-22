@@ -5,7 +5,7 @@
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHeaderView>
-
+#include <QLabel>
 #include <fstream>
 
 #include "mainwindow.hpp"
@@ -67,7 +67,7 @@ void MainWindow::SetupUi()
      * General window setup
      */
     setWindowTitle(tr("Winter Olympian Database - De Anza College, CIS 22C, Group 5"));
-    setGeometry(100, 100, 800, 600);
+    setGeometry(100, 100, 1120, 800);
 
     m_statusBar = new QStatusBar;
     setStatusBar(m_statusBar);
@@ -182,6 +182,26 @@ void MainWindow::SetupUi()
     auto gbEdit = new QGroupBox(tr("Add and remove data"));
     gbEdit->setLayout(controlsLayout);
     m_tabWidget->addTab(gbEdit, "Edit");
+
+    /*
+     * Stats
+     */
+    const double loadFactor = m_database->GetHashTable()->getLoadFactor() * 100;
+    const double tableSize = m_database->GetHashTable()->getTableSize();
+    const double nFilled = m_database->GetHashTable()->getnFilled();
+    const double nCollisions = m_database->GetHashTable()->getnCollisions();
+
+    auto statsLayout = new QFormLayout;
+    statsLayout->addRow("Load Factor (%): ", new QLabel(QString::number(loadFactor)));
+    statsLayout->addRow("Table Size: ", new QLabel(QString::number(tableSize)));
+    statsLayout->addRow("# of filled buckets: ", new QLabel(QString::number(nFilled)));
+    statsLayout->addRow("# of collisions: ", new QLabel(QString::number(nCollisions)));
+    statsLayout->addItem(new QSpacerItem(0, 100)); //add spacing row
+    statsLayout->addRow("Developed by: ", new QLabel("Aidan Sojourner, \nAshley Cline, \nAlexander Langley, \nand Jeff Yang"));
+
+    auto gbStats = new QGroupBox("Hash Table Stats");
+    gbStats->setLayout(statsLayout);
+    m_tabWidget->addTab(gbStats, "Info");
 
     /*
      * Master Layout

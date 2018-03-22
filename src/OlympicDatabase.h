@@ -67,6 +67,9 @@ public:
     void displayHeightTree();
     void displayHashStats();
     bool saveDatabase(std::string);
+
+    //ignore me pls i want to put my stats in the gui and its 1 am
+    HashTable<Olympian*>* GetHashTable() const { return hashTable;  }
 };
 
 
