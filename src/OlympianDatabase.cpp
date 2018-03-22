@@ -8,7 +8,7 @@
 using namespace std;
 
 static const int BUCKET_SIZE = 3;
-static const int SIZE = 1;
+static const int SIZE = 512;
 
 
 OlympianDatabase::OlympianDatabase(ifstream &infile)
@@ -16,12 +16,12 @@ OlympianDatabase::OlympianDatabase(ifstream &infile)
     // create hash table based on the prime nearest to double the number of entries
     int size = Util::Primes.getNearestPrime(SIZE);
 
-    hashTable = new HashTable<Olympian*>(size, BUCKET_SIZE, hashFunc, cmpName);
-    ageBst = new BinarySearchTree<Olympian*>(cmpAge);
-    heightBst = new BinarySearchTree<Olympian*>(cmpHeight);
+    hashTable = new HashTable<Olympian *>(size, BUCKET_SIZE, _hashFunc, _cmpName);
+    ageBst = new BinarySearchTree<Olympian *>(_cmpAge);
+    heightBst = new BinarySearchTree<Olympian *>(_cmpHeight);
     allRecords = new Vector<Olympian*>;
     deletionStack = new Stack<Olympian*>;
-    alphabeticalOrderList = new LinkedList<Olympian*>(cmpName);
+    alphabeticalOrderList = new LinkedList<Olympian *>(_cmpName);
 
     _buildDatabase(infile);
 }
@@ -109,12 +109,12 @@ void OlympianDatabase::displayHeightInOrder()
 
 void OlympianDatabase::displayAgeTree()
 {
-    std::cout << *ageBst << std::endl;
+    ageBst->printIndented(_printAgeIndented);
 }
 
 void OlympianDatabase::displayHeightTree()
 {
-    std::cout << *heightBst << std::endl;
+    heightBst->printIndented(_printHeightIndented);
 }
 
 void OlympianDatabase::displayHashStats()
@@ -151,7 +151,7 @@ bool OlympianDatabase::saveDatabase(std::string outfileName)
     }
 
     for (auto item : *allRecords)
-        printRecord(item, outfile);
+        _printRecord(item, outfile);
 
     outfile.close();
     return true;
@@ -228,24 +228,6 @@ bool OlympianDatabase::insert(Olympian *newEntry)
             hashTable->remove(newEntry);
 
     return false;
-
-    /*bool success = true;
-    if (!ageBst->insert(newEntry)) success = false;
-    if (!heightBst->insert(newEntry)) success = false;
-    if (!alphabeticalOrderList->insert(newEntry)) success = false;*/
-
-    /*if (!success)
-    {
-        ageBst->remove(newEntry);
-        heightBst->remove(newEntry);
-        hashTable->remove(newEntry);
-        alphabeticalOrderList->remove(newEntry);
-        return false;
-    }
-
-    nRecords++;
-
-    return true;*/
 }
 
 bool OlympianDatabase::remove(string name)
@@ -274,25 +256,8 @@ bool OlympianDatabase::remove(string name)
             hashTable->insert(foundRecord);
 
     return false;
-
-    /*bool success = true;
-    if (!hashTable->remove(foundRecord)) success = false;
-    if (!ageBst->remove(foundRecord)) success = false;
-    if (!heightBst->remove(foundRecord)) success = false;
-    if (!alphabeticalOrderList->remove(foundRecord)) success = false;*/
-
-    /*if (!success)
-    {
-        //re insert
-        insert(foundRecord);
-        return false;
-    }*/
-
-
-    deletionStack->push(foundRecord);
-    return true;
 }
-long int OlympianDatabase::hashFunc(Olympian *const &olympian, long int size)
+long int OlympianDatabase::_hashFunc(Olympian *const &olympian, long int size)
 {
     long int sum = 0;
     string name = olympian->getName();
@@ -302,13 +267,13 @@ long int OlympianDatabase::hashFunc(Olympian *const &olympian, long int size)
 
     return sum % size;
 }
-COMPARE_FN OlympianDatabase::cmpName(Olympian *const &a, Olympian *const &b)
+COMPARE_FN OlympianDatabase::_cmpName(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() < b->getName()) return COMPARE_FN::LESS_THAN;
     else if (a->getName() > b->getName()) return COMPARE_FN::GREATER_THAN;
     else return COMPARE_FN::EQUAL_TO;
 }
-COMPARE_FN OlympianDatabase::cmpAge(Olympian *const &a, Olympian *const &b)
+COMPARE_FN OlympianDatabase::_cmpAge(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_OBJECT;
 
@@ -316,7 +281,7 @@ COMPARE_FN OlympianDatabase::cmpAge(Olympian *const &a, Olympian *const &b)
     else if (a->getAge() > b->getAge()) return COMPARE_FN::GREATER_THAN;
     else return COMPARE_FN::EQUAL_TO;
 }
-COMPARE_FN OlympianDatabase::cmpHeight(Olympian *const &a, Olympian *const &b)
+COMPARE_FN OlympianDatabase::_cmpHeight(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_OBJECT;
 
@@ -325,9 +290,25 @@ COMPARE_FN OlympianDatabase::cmpHeight(Olympian *const &a, Olympian *const &b)
     else return COMPARE_FN::EQUAL_TO;
 }
 
-void OlympianDatabase::printRecord(Olympian *const &olympian, std::ostream &os)
+void OlympianDatabase::_printRecord(Olympian *const &olympian, std::ostream &os)
 {
     os << olympian->getName() << "," << olympian->getSport() << "," << olympian->getState()
        << "," << olympian->getAge() << "," << olympian->getHeight() << "," << olympian->getGender()
        << "," << olympian->getnGold() << "," << olympian->getnSilver() << "," << olympian->getnBronze() << endl;
+}
+
+void OlympianDatabase::_printAgeIndented(Olympian *const &object, const int level)
+{
+    for(int i=0; i<(level + 1) * 5 + 1; i++)
+        std::cout<<" ";
+
+    std::cout<<object->getName()<<" "<<object->getAge()<<std::endl;
+}
+
+void OlympianDatabase::_printHeightIndented(Olympian *const &object, const int level)
+{
+    for(int i=0; i<(level + 1) * 5 + 1; i++)
+        std::cout<<" ";
+
+    std::cout<<object->getName()<<" "<<object->getHeight()<<std::endl;
 }

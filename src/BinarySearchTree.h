@@ -1,7 +1,7 @@
 /** Binary Search Tree ADT
  * @author Aidan Sojourner, Feb 2018
  * @file BinarySearchTree.h
-*/
+ */
 
 #pragma once
 
@@ -13,24 +13,24 @@ class BinarySearchTree
 {
 public:
     typedef COMPARE_FN(*cmpFn)(const T&, const T&);
-
+    
     // "admin" functions
     explicit BinarySearchTree(cmpFn fn);
     virtual ~BinarySearchTree();
-
+    
     //copy constructor
     BinarySearchTree(const BinarySearchTree<T>& tree);
-
+    
     //copy assignment operator
     BinarySearchTree& operator= (const BinarySearchTree& sourceTree);
     //operator<< that outputs an indented list using recursive print function
     template<class C>
     friend std::ostream& operator<<(std::ostream& stream, const BinarySearchTree<C>& other);
-
+    
     bool empty() const { return count == 0; }
     int size() const { return count; }
     void clear() { _destroy(rootPtr); rootPtr = nullptr; count = 0; }
-
+    
     // insert a node at the correct location
     bool insert(const T& newEntry);
     // remove a node if found
@@ -41,7 +41,10 @@ public:
     T& findSmallest() const;
     // find the largest node
     T& findLargest() const;
+    //print indended
+    void printIndented(void visit(const T&, const int level)) const { _preorder(visit, rootPtr, 0); }
 
+    
     void insertInorder(Vector<T>& v);
 private:
     struct BinaryNode
@@ -49,21 +52,21 @@ private:
         T item;                 // Data portion
         BinaryNode* leftPtr;	// Pointer to left child
         BinaryNode* rightPtr;   // Pointer to right child
-
+        
         explicit BinaryNode(const T& anItem)
-                : item(anItem), leftPtr(nullptr), rightPtr(nullptr) {}
+        : item(anItem), leftPtr(nullptr), rightPtr(nullptr) {}
         BinaryNode(const T& anItem, BinaryNode* left, BinaryNode* right)
-                : item(anItem), leftPtr(left), rightPtr(right) {}
-
+        : item(anItem), leftPtr(left), rightPtr(right) {}
+        
         bool isLeaf() const { return (leftPtr == nullptr && rightPtr == nullptr);}
     };
     typedef typename BinarySearchTree<T>::BinaryNode node;
-
+    
     cmpFn compare;
-
+    
     unsigned int count;
     node* rootPtr;
-
+    
     //internal utility functions
     // delete target node from tree, called by internal remove node
     node* deleteNode(node *targetNodePtr);
@@ -73,23 +76,26 @@ private:
     void _destroy(node *nodePtr);
     // copy from the tree rooted at nodePtr and returns a pointer to the copy
     node* copyTree(const node* nodePtr);
-
+    
     //internal recursive functions
     //internal insert node: insert newNode in nodePtr subtree
     node* _insert(node* nodePtr, node* newNode);
     //internal remove node: locate and delete target node under nodePtr subtree
     node* _remove(node* nodePtr, const T& target, bool& success);
-
+    
     bool _find(node *treePtr, const T &target, Vector<T>& results) const;
     T& _smallest(node *nodePtr) const;
     T& _largest(node* nodePtr) const;
-
+    
     // internal traverse for copy
     node* _copy(const node* nodePtr);
     // internal traverse to insert into vector
     void _insert_inorder(node* nodePtr, Vector<T>& v);
     //indented list traverse
     void _print(node* nodePtr, std::ostream& stream, int indentLevel) const;
+    //indented print
+    void _preorder(void visit(const T &, const int level), BinaryNode *nodePtr, int floor) const;
+
 };
 /************************************************************************/
 ///////////////////////// public (exported) functions /////////////////////
@@ -98,13 +104,13 @@ private:
 //default ctor
 template <class T>
 BinarySearchTree<T>::BinarySearchTree(cmpFn fn)
-        : rootPtr(nullptr), count(0), compare(fn)
+: rootPtr(nullptr), count(0), compare(fn)
 {}
 
 //copy assignment ctor
 template <class T>
 BinarySearchTree<T>::BinarySearchTree(const BinarySearchTree<T>& tree)
-        : rootPtr(nullptr), count(0)
+: rootPtr(nullptr), count(0)
 {
     compare = tree.compare;
     copyTree(tree.rootPtr);
@@ -225,7 +231,7 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::removeLeftmost(node *no
     }
     nodePtr->leftPtr = removeLeftmost(nodePtr->leftPtr, successor);
     return nodePtr;
-
+    
 }
 //internal copy that ensures we properly destroy *this before we copy a new tree
 template<class T>
@@ -284,7 +290,7 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_remove(node* nodePtr, 
         success = false;
         return nullptr;
     }
-
+    
     if (compare(nodePtr->item, target) == COMPARE_FN::GREATER_THAN)
     {
         nodePtr->leftPtr = _remove(nodePtr->leftPtr, target, success);
@@ -304,7 +310,7 @@ typename BinarySearchTree<T>::node* BinarySearchTree<T>::_remove(node* nodePtr, 
     {
         nodePtr->rightPtr = _remove(nodePtr->rightPtr, target, success);
     }
-
+    
     return nodePtr;
 }
 //recursive - tries to find all nodes with value equal to target in the tree rooted at nodePtr.
@@ -316,7 +322,7 @@ bool BinarySearchTree<T>::_find(node *nodePtr, const T& target, Vector<T>& resul
 {
     //base case: null check before we try to access items
     if (!nodePtr) return false;
-
+    
     //check if we found the correct item first
     if (compare(nodePtr->item, target) == COMPARE_FN::EQUAL_TO)
     {
@@ -338,7 +344,7 @@ bool BinarySearchTree<T>::_find(node *nodePtr, const T& target, Vector<T>& resul
         // search the right subtree for duplicates of the target item
         _find(nodePtr->rightPtr, target, results);
     }
-
+    
 }
 
 //recursive traversal of right side only, the right side contains the largest node
@@ -390,7 +396,7 @@ void BinarySearchTree<T>::_insert_inorder(node* nodePtr, Vector<T>& v)
         v.add(nodePtr->item);
         _insert_inorder(nodePtr->rightPtr, v);
     }
-
+    
 }
 
 //internal recursive print function that outputs to std::ostream
@@ -401,8 +407,20 @@ void BinarySearchTree<T>::_print(node *nodePtr, std::ostream &stream, int indent
     {
         //std::string(int n, char* c) prints "c" n times! very useful :)
         stream << std::string(indentLevel, '\t') << indentLevel++ << ". " << nodePtr->item << std::endl;
-
+        
         _print(nodePtr->leftPtr, stream, indentLevel);
         _print(nodePtr->rightPtr, stream, indentLevel);
+    }
+}
+
+//this function prints data indented
+template<class T>
+void BinarySearchTree<T>::_preorder(void visit(const T&, const int level), BinaryNode *nodePtr, int floor) const
+{
+    if (nodePtr != 0)
+    {
+         visit(nodePtr->item, floor);
+        _preorder(visit, nodePtr->leftPtr, floor++);
+        _preorder(visit, nodePtr->rightPtr, floor++);
     }
 }

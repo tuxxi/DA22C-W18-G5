@@ -28,13 +28,17 @@ protected:
     bool _buildDatabase(std::ifstream&);
     Olympian *_readRecord(std::ifstream&);
 
-    static long hashFunc(Olympian *const &olympian, long int size);
+    static long _hashFunc(Olympian *const &olympian, long int size);
 
-    static COMPARE_FN cmpName(Olympian *const &, Olympian *const &);
-    static COMPARE_FN cmpAge(Olympian *const &, Olympian *const &);
-    static COMPARE_FN cmpHeight(Olympian *const &, Olympian *const &);
+    static COMPARE_FN _cmpName(Olympian *const &, Olympian *const &);
+    static COMPARE_FN _cmpAge(Olympian *const &, Olympian *const &);
+    static COMPARE_FN _cmpHeight(Olympian *const &, Olympian *const &);
 
-    static void printRecord(Olympian *const &, std::ostream&);
+    static void _printRecord(Olympian *const &, std::ostream &);
+
+    static void _printAgeIndented(Olympian *const &, const int);
+
+    static void _printHeightIndented(Olympian *const &, const int);
 
 public:
     explicit OlympianDatabase(std::ifstream&);
