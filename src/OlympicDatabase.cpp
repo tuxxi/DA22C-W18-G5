@@ -299,16 +299,16 @@ void OlympicDatabase::_printRecord(Olympian *const &olympian, std::ostream &os)
 
 void OlympicDatabase::_printAgeIndented(Olympian *const &object, const int level)
 {
-    for(int i=0; i<(level + 1) * 5 + 1; i++)
-        std::cout<<" ";
+    for(int i = 0; i < (level + 1) * 5 + 1; i++)
+        cout << " ";
 
-    std::cout<<object->getName()<<" "<<object->getAge()<<std::endl;
+    cout << object->getName() << " -- " <<object->getAge() << " years old" << endl;
 }
 
 void OlympicDatabase::_printHeightIndented(Olympian *const &object, const int level)
 {
-    for(int i=0; i<(level + 1) * 5 + 1; i++)
-        std::cout<<" ";
+    for(int i = 0; i < (level + 1) * 5 + 1; i++)
+        cout << " ";
 
-    std::cout<<object->getName()<<" "<<object->getHeight()<<std::endl;
+    cout << object->getName() << " -- " << object->getHeight() << " inches tall" << endl;
 }
