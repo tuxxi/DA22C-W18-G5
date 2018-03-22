@@ -337,13 +337,12 @@ bool OlympicDatabase::remove(string name)
  */
 long int OlympicDatabase::_hashFunc(Olympian *const &olympian, long int size)
 {
-    long int sum = 0;
     string name = olympian->getName();
 
-    for (int i = 0; i < name.length(); i++)
-        sum += name[i] * name[i] * name[i];
+    const size_t arraysize = name.length() * sizeof(char);
+    const unsigned CRC32 = Util::CRC32.CalcCRC32(name.data(), arraysize);
 
-    return sum % size;
+    return CRC32 % size;
 }
 /******************************************************
    Comparison function that takes two pointers to

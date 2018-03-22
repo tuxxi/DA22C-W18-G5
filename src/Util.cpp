@@ -3,7 +3,6 @@
 //
 
 #include "Util.h"
-#include <cmath>
 
 using namespace Util;
 
@@ -72,4 +71,40 @@ void PrimeNumbers::CreatePrimes()
     for (int i=1; i<=n/2; i++)
         if (flags[i] == 0)
             primes.add(2*i + 1);
+}
+
+CRC32Interface::CRC32Interface() noexcept
+{
+    CreateTable();
+}
+
+//Calcuates an ISO 3309 CRC-32 checksum for a given message and size
+//see https://en.wikipedia.org/wiki/Cyclic_redundancy_check#CRC-32_algorithm
+unsigned CRC32Interface::CalcCRC32(const char* message, unsigned int size)
+{
+    unsigned int crc = 0xFFFFFFFF; //initial value
+
+    for (int i = 0; i < size; ++i)
+    {
+        const unsigned index = (crc ^ message[i]) & 0xFF;
+        crc = (crc >> 8) ^ table[index]; //use the stored table to calcuate CRC
+    }
+    return ~crc;
+
+}
+// Creates the static lookup table for CRC-32, this makes computation extremely efficent
+// since these table values are used in every cycle of CRC
+void CRC32Interface::CreateTable()
+{
+    for (int byte = 0; byte < CRC_TABLE_SIZE; byte++)
+    {
+        unsigned crc = byte;
+        for (int j = 7; j >= 0; j--)
+        {
+            const unsigned mask = -(crc & 1);
+            crc = (crc >> 1) ^ (0xEDB88320 & mask); //0xEDB88320 is the polynomial for ISO 3309 CRC-32
+            //x^32 + x^26 + x^23 + x^16 + x^12 + x^11 + x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1 
+        }
+        table[byte] = crc;
+    }
 }

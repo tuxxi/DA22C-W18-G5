@@ -39,7 +39,7 @@ void MainWindow::ReadFile(const QString &fn)
     {
         QMessageBox::critical(this, "Could not open file!",
             "Could not open Olympian Database file!");
-        return;
+        exit(-1);
     }
 
     m_database = std::make_unique<OlympicDatabase>(file);

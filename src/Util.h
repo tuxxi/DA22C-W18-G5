@@ -17,6 +17,7 @@ enum class COMPARE_FN
 
 namespace Util
 {
+    //thic class represents an interface for efficently finding prime numbers
     class PrimeNumbers
     {
     public:
@@ -34,6 +35,23 @@ namespace Util
         Vector<int> primes;
         static const int MAX_PRIME = 100000;
     };
+
+    static PrimeNumbers Primes;
+
+    //thic class represents an interface for calculating a CRC-32 checksum
+    class CRC32Interface
+    {
+    public:
+        CRC32Interface() noexcept; //init the table and get the interface ready
+        unsigned int CalcCRC32(const char *message, unsigned int size);
+    private:
+        void CreateTable(); 
+        static const unsigned CRC_TABLE_SIZE = 256;
+
+        unsigned int table[CRC_TABLE_SIZE]; //precalculated CRC32Interface values
+    };
+
+    static CRC32Interface CRC32;
 
 //beware, mumbo jumbo ahead!
 #if __cplusplus > 201103L //C++14 only in these parts
@@ -69,6 +87,4 @@ namespace Util
         return n == i ? n : (i * i < n ? ct_sqrt(n, i + 1) : i);
     }
 #endif //__cplusplus
-
-    static PrimeNumbers Primes;
 }
