@@ -15,6 +15,7 @@ private:
     int bucketSize;
     int tableSpacesFilled;
     int nCollisions;
+    int nResizes;
     T **table;
     bool **isFilled;
     int *nFilled;
@@ -37,7 +38,7 @@ private:
     void _deleteTable(T**, bool**, int*, Vector<T>*, long int);
 
 public:
-    HashTable(long int, int, hashFn, cmpFn);
+    HashTable(long int, int, hashFn, cmpFn, int nResizes = 0);
 
     ~HashTable();
 
@@ -45,6 +46,7 @@ public:
     int getnFilled() { return tableSpacesFilled; }
     int getnCollisions() { return nCollisions; }
     double getLoadFactor() { return static_cast<double>(tableSpacesFilled) / tableSize; }
+    int getnResizes() { return nResizes; }
 
     bool insert(const T&);
     bool remove(const T&);
@@ -57,12 +59,13 @@ public:
    that will be used to compare records in the table.
  */
 template <class T>
-HashTable<T>::HashTable(long int tableSize, int bucketSize, hashFn hash, cmpFn cmp)
+HashTable<T>::HashTable(long int tableSize, int bucketSize, hashFn hash, cmpFn cmp, int nResizes)
 {
     this->tableSize = tableSize;
     this->bucketSize = bucketSize;
     this->tableSpacesFilled = 0;
     this->nCollisions = 0;
+    this->nResizes = nResizes;
     this->table = new T*[tableSize] {nullptr};
     this->isFilled = new bool*[tableSize] {nullptr};
     this->nFilled = new int[tableSize] {0};
@@ -266,7 +269,7 @@ bool HashTable<T>::_search(T &searchObj)
 template <class T>
 bool HashTable<T>::_resize(long int newSize)
 {
-    HashTable<T> *newHashTable = new HashTable<T>(newSize, bucketSize, _hash, cmp);
+    HashTable<T> *newHashTable = new HashTable<T>(newSize, bucketSize, _hash, cmp, nResizes + 1);
 
     for (int i = 0; i < tableSize; i++)
         if (table[i])

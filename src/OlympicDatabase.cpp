@@ -10,7 +10,7 @@
 using namespace std;
 
 static const int BUCKET_SIZE = 3;
-static const int SIZE = 256;
+static const int SIZE = 100;
 
 /******************************************************
    Accepts an already open input file stream and builds
@@ -169,7 +169,8 @@ void OlympicDatabase::displayHashStats()
     cout << "Current Table Size: " << hashTable->getTableSize() << endl;
     cout << "Number of Buckets Used: " << hashTable->getnFilled() << endl;
     cout << "Current Load Factor: " << setprecision(2) << fixed << loadFactor << "%\n";
-    cout << "# of Collisions: " << hashTable->getnCollisions() << endl;
+    cout << "Number of Collisions: " << hashTable->getnCollisions() << endl;
+    cout << "Total Number of Resizes: " << hashTable->getnResizes() << endl;
 }
 
 /******************************************************
