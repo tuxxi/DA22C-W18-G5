@@ -2,6 +2,9 @@
 
 #include "Vector.h"
 
+/** @brief an enum to improve readability for
+ * the function pointers used by various data structures
+ */
 enum class COMPARE_FN
 {
     LESS_THAN = -1,
@@ -16,6 +19,9 @@ namespace Util
     {
     public:
         PrimeNumbers() noexcept; //declare the ctor noexcept so clang-tidy doesn't yell at me for static storage allocation
+        /**@brief uses binary search to find the nearest prime to @param n
+         * @return the nearest prime
+         */
         int getNearestPrime(int n);
     private:
         // modified binary search to find nearest prime less than N
@@ -27,6 +33,7 @@ namespace Util
         static const int MAX_PRIME = 100000;
     };
 
+//beware, mumbo jumbo ahead!
 #if __cplusplus > 201103L //C++14 only in these parts
 
     namespace Detail

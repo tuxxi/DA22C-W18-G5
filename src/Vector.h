@@ -12,36 +12,78 @@ public:
     Vector();
     virtual ~Vector();
 
-    T& operator[](size_t idx) const;
-    T& at(size_t idx) const throw();
-
     Vector<T>& operator=(const Vector<T> &other);
 
-    bool add(const T& item);
-    bool insertAt(const T& item, int index);
-    bool reserve(size_t size);
-    bool remove(size_t idx);
-    void clear();
+    /** @brief utility, same as Vector::at()
+     */
+    T& operator[](size_t idx) const;
 
-    size_t size() const;
-
-    bool empty() const;
-
-    T* begin() { return m_array; }
-    T* rbegin() { return m_array + m_count - 1; }
-    T* end() { return m_array + m_count; }
-    T* rend() { return m_array - 1; }
-
-    //I do this to suppress -Wnon-template-friend
-    template<class _T>
+    /** @brief utility std::ostream insertion operator
+     */
+    template<class _T>    //I do this to suppress -Wnon-template-friend
     friend std::ostream& operator<<(std::ostream& str, const Vector<_T>& vec);
 
+    /** @brief gets a reference to the element at given index
+     * @param idx the array index to access
+     * @return T&, a reference to the item we want
+     */
+    T& at(size_t idx) const throw();
+
+    /** @brief Adds an item to the vector
+     * @param item the item to add to the vector
+     * @return true if successful
+     */
+    bool add(const T& item);
+
+    /** @brief inserts an item at a given index to the vector
+     * @param item the item to add
+     * @param index the index to insert at
+     * @return true if successful
+     */
+    bool insertAt(const T& item, int index);
+
+    /** @brief reserve space for the vector's data, growing its array
+     * @param size the new size of the vector
+     * @return false if @param size <= current size if successful
+     */
+    bool reserve(size_t size);
+
+    /** @brief remove an item from the vector
+     * @param idx the index of the item to remove
+     * @return true if successful
+     */
+    bool remove(size_t idx);
+
+    /** @brief clears out the memory of the vector and re-initilizes it
+     */
+    void clear();
+
+    /** @brief get the current size of the vector, or the current number of elements
+     * @return the current size
+     */
+    size_t size() const;
+
+    /** @brief check if the vector is empty
+     * @return true if empty, false if not
+     */
+    bool empty() const;
+
+    /** @brief Iterators for utility, think std::vector::iterator but without dumb encapsulation
+     */
+    T* begin() const { return m_array; }
+    T* rbegin() const { return m_array + m_count - 1; }
+    T* end() const { return m_array + m_count; }
+    T* rend() const { return m_array - 1; }
+
 private:
+    /** @brief clears out all data without initiliziing a new array
+     */
     void clearData();
-    static const size_t DEFAULT_SIZE = 8;
-    size_t m_count;
-    size_t m_arraySize;
-    T* m_array;
+
+    static const size_t DEFAULT_SIZE = 8; //default starting size, vector will grow when expanded to beyond this size
+    size_t m_count; //# of items in the array
+    size_t m_arraySize; //total size of array
+    T* m_array; //the vector data, heap allocated with Vector::reserve()
 };
 
 template<class T>
@@ -178,7 +220,7 @@ Vector<T>& Vector<T>::operator=(const Vector<T> &other)
 }
 
 template<class _T>
-std::ostream& operator<<(std::ostream& str, Vector<_T>& vec)
+std::ostream& operator<<(std::ostream& str, const Vector<_T>& vec)
 {
     for (_T* it = vec.begin(); it != vec.end(); ++it)
     {

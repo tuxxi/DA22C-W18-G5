@@ -4,6 +4,7 @@
 #include <QLineEdit>
 #include <QSpinBox>
 #include "../OlympicDatabase.h"
+#include <QComboBox>
 
 class AddOlympianDialog : public QDialog
 {
