@@ -13,7 +13,7 @@ class HashTable
 private:
     long int tableSize;
     int bucketSize;
-    int tableSpacesFilled;
+    long int tableSpacesFilled;
     int nCollisions;
     int nResizes;
     T **table;
@@ -43,7 +43,7 @@ public:
     ~HashTable();
 
     long int getTableSize() { return tableSize; }
-    int getnFilled() { return tableSpacesFilled; }
+    long int getnFilled() { return tableSpacesFilled; }
     int getnCollisions() { return nCollisions; }
     double getLoadFactor() { return static_cast<double>(tableSpacesFilled) / tableSize; }
     int getnResizes() { return nResizes; }
