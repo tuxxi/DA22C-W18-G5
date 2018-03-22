@@ -10,7 +10,7 @@
 #include "Stack.h"
 #include "Util.h"
 
-#define MAX_LOAD_FACTOR 0.6
+#define MAX_LOAD_FACTOR 0.75
 
 template <class T>
 class HashTable
