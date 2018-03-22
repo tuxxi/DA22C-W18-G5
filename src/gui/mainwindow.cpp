@@ -190,12 +190,15 @@ void MainWindow::SetupUi()
     const double tableSize = m_database->GetHashTable()->getTableSize();
     const double nFilled = m_database->GetHashTable()->getnFilled();
     const double nCollisions = m_database->GetHashTable()->getnCollisions();
+    const int nResizes = m_database->GetHashTable()->getnResizes();
 
     auto statsLayout = new QFormLayout;
     statsLayout->addRow("Load Factor (%): ", new QLabel(QString::number(loadFactor)));
     statsLayout->addRow("Table Size: ", new QLabel(QString::number(tableSize)));
     statsLayout->addRow("# of filled buckets: ", new QLabel(QString::number(nFilled)));
     statsLayout->addRow("# of collisions: ", new QLabel(QString::number(nCollisions)));
+    statsLayout->addRow("# of resize operations: ", new QLabel(QString::number(nResizes)));
+
     statsLayout->addItem(new QSpacerItem(0, 100)); //add spacing row
     statsLayout->addRow("Developed by: ", new QLabel("Aidan Sojourner, \nAshley Cline, \nAlexander Langley, \nand Jeff Yang"));
 
