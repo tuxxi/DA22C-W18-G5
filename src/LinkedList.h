@@ -1,3 +1,5 @@
+// Specification file for the LinkedList and ListNode template classes
+
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
@@ -44,6 +46,10 @@ public:
     void insertToVector(Vector<T>& v);
 };
 
+/******************************************************
+   Constructor that accepts a pointer to a comparison
+   function to be used when traversing the list.
+ */
 template <class T>
 LinkedList<T>::LinkedList(cmpFn cmp)
     : count(0)
@@ -52,6 +58,9 @@ LinkedList<T>::LinkedList(cmpFn cmp)
     this->cmp = cmp;
 }
 
+/******************************************************
+   Traverse the list and print each item to stdout
+ */
 template <class T>
 void LinkedList<T>::displayList()
 {
@@ -63,6 +72,7 @@ void LinkedList<T>::displayList()
         nodePtr = nodePtr->getNext();
     }
 }
+
 
 template <class T>
 bool LinkedList<T>::insert(const T &newData)
@@ -125,6 +135,10 @@ bool LinkedList<T>::search(T &searchKey)
     return true;
 }
 
+/******************************************************
+   Insert all the records in the list into a Vector object.
+   (We needed this method to support GUI ops).
+ */
 template <class T>
 void LinkedList<T>::insertToVector(Vector<T>& v)
 {

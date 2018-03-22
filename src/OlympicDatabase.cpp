@@ -1,3 +1,5 @@
+// Implementation file for the OlympicDatabase class
+
 #include "OlympicDatabase.h"
 
 #include <fstream>
@@ -10,7 +12,10 @@ using namespace std;
 static const int BUCKET_SIZE = 3;
 static const int SIZE = 512;
 
-
+/******************************************************
+   Accepts an already open input file stream and builds
+   the database from the file
+ */
 OlympicDatabase::OlympicDatabase(ifstream &infile)
 {
     // create hash table based on the prime nearest to double the number of entries
@@ -26,6 +31,9 @@ OlympicDatabase::OlympicDatabase(ifstream &infile)
     _buildDatabase(infile);
 }
 
+/******************************************************
+   Destroy all the data in the database.
+ */
 OlympicDatabase::~OlympicDatabase()
 {
     delete hashTable;
@@ -40,6 +48,10 @@ OlympicDatabase::~OlympicDatabase()
     delete allRecords;
 }
 
+/******************************************************
+   Undo previous deletions by popping from the stack of
+   deleted items and inserting them into the database.
+ */
 bool OlympicDatabase::undoDelete()
 {
     Olympian *lastDeleted;
@@ -61,6 +73,10 @@ bool OlympicDatabase::undoDelete()
     return false;
 
 }
+
+/******************************************************
+   Search the hash table to find an olympian by name.
+ */
 Olympian *OlympicDatabase::searchByName(string name)
 {
     Olympian o;
@@ -73,6 +89,10 @@ Olympian *OlympicDatabase::searchByName(string name)
     return nullptr;
 }
 
+/******************************************************
+   Search the BST that is sorted by age to return all
+   results that match a particular age.
+ */
 bool OlympicDatabase::searchByAge(int age, Vector<Olympian*>& vecResults)
 {
     Olympian oly;
@@ -83,6 +103,10 @@ bool OlympicDatabase::searchByAge(int age, Vector<Olympian*>& vecResults)
     return !vecResults.empty();
 }
 
+/******************************************************
+   Search the BST that is sorted by age to return all
+   results that match a particular height.
+ */
 bool OlympicDatabase::searchByHeight(int height, Vector<Olympian*>& vecResults)
 {
     Olympian oly;
@@ -93,6 +117,9 @@ bool OlympicDatabase::searchByHeight(int height, Vector<Olympian*>& vecResults)
     return !vecResults.empty();
 }
 
+/******************************************************
+   Display the BST that is sorted by age inorder.
+ */
 void OlympicDatabase::displayAgeInOrder()
 {
     Vector<Olympian*> printVec;
@@ -100,6 +127,9 @@ void OlympicDatabase::displayAgeInOrder()
     cout << printVec;
 }
 
+/******************************************************
+   Display the BST that is sorted by height inorder.
+ */
 void OlympicDatabase::displayHeightInOrder()
 {
     Vector<Olympian*> printVec;
@@ -107,16 +137,29 @@ void OlympicDatabase::displayHeightInOrder()
     cout << printVec;
 }
 
+/******************************************************
+   Display the BST that is sorted by age as an indented
+   tree.
+ */
 void OlympicDatabase::displayAgeTree()
 {
     ageBst->printIndented(_printAgeIndented);
 }
 
+/******************************************************
+   Display the BST that is sorted by height as an indented
+   tree.
+ */
 void OlympicDatabase::displayHeightTree()
 {
     heightBst->printIndented(_printHeightIndented);
 }
 
+/******************************************************
+   Display the current size, number of buckets used,
+   load factor, and number of collisions for the hash
+   table.
+ */
 void OlympicDatabase::displayHashStats()
 {
     double loadFactor = hashTable->getLoadFactor();
@@ -128,6 +171,10 @@ void OlympicDatabase::displayHashStats()
     cout << "Current Load Factor: " << setprecision(2) << fixed << loadFactor << "%\n";
     cout << "# of Collisions: " << hashTable->getnCollisions() << endl;
 }
+
+/******************************************************
+   Display the unsorted data.
+ */
 void OlympicDatabase::displayAll()
 {
     for (auto oly : *allRecords)
@@ -135,11 +182,19 @@ void OlympicDatabase::displayAll()
         cout << *oly;
     }
 }
+
+/******************************************************
+   Display all records in alphabetical order by traversing
+   the linked list that is sorted by name.
+ */
 void OlympicDatabase::displayAlphabeticalOrder()
 {
     alphabeticalOrderList->displayList();
 }
 
+/******************************************************
+   Save all records to an output file.
+ */
 bool OlympicDatabase::saveDatabase(std::string outfileName)
 {
     ofstream outfile(outfileName);
@@ -157,6 +212,10 @@ bool OlympicDatabase::saveDatabase(std::string outfileName)
     return true;
 }
 
+/******************************************************
+   Build the database from file. Keep inserting records
+   as long as there are more records in the file.
+ */
 bool OlympicDatabase::_buildDatabase(ifstream &infile)
 {
     while (auto newRecord = _readRecord(infile))
@@ -166,6 +225,10 @@ bool OlympicDatabase::_buildDatabase(ifstream &infile)
     return true;
 }
 
+/******************************************************
+   Read one record from the input file and create a new
+   Olympian object to be inserted into the database.
+ */
 Olympian *OlympicDatabase::_readRecord(std::ifstream &infile)
 {
     /*//seek to the given line num
@@ -208,6 +271,12 @@ Olympian *OlympicDatabase::_readRecord(std::ifstream &infile)
     return nullptr;
 }
 
+/******************************************************
+   Insert a record into every data structure in the
+   database. If insertion into one structure is not
+   successful, remove from the ones into which it has
+   already been inserted.
+ */
 bool OlympicDatabase::insert(Olympian *newEntry)
 {
     //insert into hash table first.
@@ -229,7 +298,12 @@ bool OlympicDatabase::insert(Olympian *newEntry)
 
     return false;
 }
-
+/******************************************************
+   Remove a record from the entire database. If deletion
+   from any data structure is not successful, re-inserts
+   the record into the structures for which deletion was
+   already done.
+ */
 bool OlympicDatabase::remove(string name)
 {
     Olympian o;
@@ -257,6 +331,10 @@ bool OlympicDatabase::remove(string name)
 
     return false;
 }
+
+/******************************************************
+   Hash function to be passed into the hash table constructor.
+ */
 long int OlympicDatabase::_hashFunc(Olympian *const &olympian, long int size)
 {
     long int sum = 0;
@@ -267,12 +345,20 @@ long int OlympicDatabase::_hashFunc(Olympian *const &olympian, long int size)
 
     return sum % size;
 }
+/******************************************************
+   Comparison function that takes two pointers to
+   Olympian objects and compares their names.
+ */
 COMPARE_FN OlympicDatabase::_cmpName(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() < b->getName()) return COMPARE_FN::LESS_THAN;
     else if (a->getName() > b->getName()) return COMPARE_FN::GREATER_THAN;
     else return COMPARE_FN::EQUAL_TO;
 }
+/******************************************************
+   Comparison function that takes two pointers to
+   Olympian objects and compares their ages.
+ */
 COMPARE_FN OlympicDatabase::_cmpAge(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_OBJECT;
@@ -281,6 +367,11 @@ COMPARE_FN OlympicDatabase::_cmpAge(Olympian *const &a, Olympian *const &b)
     else if (a->getAge() > b->getAge()) return COMPARE_FN::GREATER_THAN;
     else return COMPARE_FN::EQUAL_TO;
 }
+
+/******************************************************
+   Comparison function that takes two pointers to
+   Olympian objects and compares their heights.
+ */
 COMPARE_FN OlympicDatabase::_cmpHeight(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_OBJECT;
@@ -290,6 +381,9 @@ COMPARE_FN OlympicDatabase::_cmpHeight(Olympian *const &a, Olympian *const &b)
     else return COMPARE_FN::EQUAL_TO;
 }
 
+/******************************************************
+   Print a record in a format appropriate to a csv file.
+ */
 void OlympicDatabase::_printRecord(Olympian *const &olympian, std::ostream &os)
 {
     os << olympian->getName() << "," << olympian->getSport() << "," << olympian->getState()
@@ -297,6 +391,11 @@ void OlympicDatabase::_printRecord(Olympian *const &olympian, std::ostream &os)
        << "," << olympian->getnGold() << "," << olympian->getnSilver() << "," << olympian->getnBronze() << endl;
 }
 
+/******************************************************
+   Function to passed to the print indented list function
+   of the BST that is sorted by age. Prints the name and
+   age of the input object.
+ */
 void OlympicDatabase::_printAgeIndented(Olympian *const &object, const int level)
 {
     for(int i = 0; i < (level + 1) * 5 + 1; i++)
@@ -305,6 +404,11 @@ void OlympicDatabase::_printAgeIndented(Olympian *const &object, const int level
     cout << object->getName() << " -- " <<object->getAge() << " years old" << endl;
 }
 
+/******************************************************
+   Function to passed to the print indented list function
+   of the BST that is sorted by height. Prints the name and
+   height of the input object.
+ */
 void OlympicDatabase::_printHeightIndented(Olympian *const &object, const int level)
 {
     for(int i = 0; i < (level + 1) * 5 + 1; i++)

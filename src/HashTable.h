@@ -51,6 +51,11 @@ public:
     bool search(T&);
 };
 
+/******************************************************
+   Constructor for the hash table. Takes the table size,
+   bucket size, hash function and comparison function
+   that will be used to compare records in the table.
+ */
 template <class T>
 HashTable<T>::HashTable(long int tableSize, int bucketSize, hashFn hash, cmpFn cmp)
 {
@@ -137,6 +142,9 @@ bool HashTable<T>::_insert(const T &newData)
     return false;
 }
 
+/******************************************************
+   Insert a record into the overflow area.
+ */
 template <class T>
 bool HashTable<T>::_insertOverflow(const T &newData)
 {
@@ -150,6 +158,9 @@ bool HashTable<T>::_insertOverflow(const T &newData)
     return false;
 }
 
+/******************************************************
+   Remove a record from the overflow area
+ */
 template <class T>
 bool HashTable<T>::_removeOverflow(const T &removalKey)
 {
@@ -182,6 +193,10 @@ bool HashTable<T>::_searchOverflow(T &searchObj)
     return false;
 }
 
+/******************************************************
+   Checks a bucket and returns true if a record identical
+   to newData is found in it. Return false otherwise.
+ */
 template <class T>
 bool HashTable<T>::_checkDuplicate(const T &newData, long int hashVal)
 {
@@ -192,6 +207,10 @@ bool HashTable<T>::_checkDuplicate(const T &newData, long int hashVal)
     return false;
 }
 
+/******************************************************
+   Try to remove an item from the main table. Return false
+   if the record is not found.
+ */
 template <class T>
 bool HashTable<T>::_remove(const T &removalKey)
 {
@@ -218,6 +237,10 @@ bool HashTable<T>::_remove(const T &removalKey)
     return false;
 }
 
+/******************************************************
+   Search for a record in the main table. Return false
+   if the record is not found.
+ */
 template <class T>
 bool HashTable<T>::_search(T &searchObj)
 {
@@ -234,6 +257,12 @@ bool HashTable<T>::_search(T &searchObj)
     return false;
 }
 
+/******************************************************
+   Resize the hash table. Creates a new HashTable object
+   and rehashes all entries. Assigns the new HashTable
+   object to *this and deletes the old one. Return false
+   if the resize operation triggers another resize.
+ */
 template <class T>
 bool HashTable<T>::_resize(long int newSize)
 {
@@ -265,28 +294,9 @@ bool HashTable<T>::_resize(long int newSize)
     return true;
 }
 
-template <class T>
-void HashTable<T>::_deleteTable(T **table, bool **isFilled, int *nFilled, Vector<T> *overflowArea, long int tableSize)
-{
-    T **ptr1 = table;
-    bool **ptr2 = isFilled;
-
-    while (ptr1 < table + tableSize)
-    {
-        if (*ptr1)
-        {
-            delete *ptr1;
-            delete *ptr2;
-        }
-
-        ptr1++;
-        ptr2++;
-    }
-
-    delete nFilled;
-    delete overflowArea;
-}
-
+/******************************************************
+   Free all allocated memory in the HashTable object
+ */
 template <class T>
 HashTable<T>::~HashTable()
 {
