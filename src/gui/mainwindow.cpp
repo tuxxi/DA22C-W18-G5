@@ -11,45 +11,85 @@
 #include "mainwindow.hpp"
 #include "addolympiandialog.hpp"
 
-#define DEFAULT_INFILE "winter-olympics.csv"
-#define DEFAULT_OUTFILE "winter-olympics-out.csv"
+#define DEFAULT_INFILE "../data/winter-olympics.csv"
+#define DEFAULT_OUTFILE "../data/winter-olympics-out.csv"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
-    ReadFile();
+    ReadFile(DEFAULT_INFILE);
     SetupUi();
 }
 
 MainWindow::~MainWindow() = default;
 
-void MainWindow::ReadFile()
+void MainWindow::ReadFile(const QString &fn)
 {
     //try to open a file in the current running directory
-    std::ifstream file(DEFAULT_INFILE);
+    std::ifstream file(fn.toStdString());
     if (!file)
     {
         //prompt the user to open a file
         auto filename = QFileDialog::getOpenFileName(this,
             tr("Open Database"), "", tr(".csv files (*.csv)"));
-        file = std::ifstream(filename.toUtf8().constData());
+        file = std::ifstream(filename.toStdString());
     }
-    //if we still didn't open a file, just exit
-    if (!file) exit(-1);
+    //if we still didn't open a file, issue a very strict warning
+    if (!file)
+    {
+        QMessageBox::critical(this, "Could not open file!",
+            "Could not open Olympian Database file!");
+        return;
+    }
 
     m_database = std::make_unique<OlympicDatabase>(file);
 }
 
+void MainWindow::SaveFile(const QString& fn)
+{
+    QString filename;
+    if (fn.isEmpty())
+    {
+        //prompt the user to choose the output file
+        filename = QFileDialog::getSaveFileName(this,
+            tr("Save Database"), "", tr(".csv files (*.csv)"));
+    }
+    if (!m_database->saveDatabase(filename.toStdString()))
+    {
+        QMessageBox::critical(this, "Could not save file!",
+            "Could not save Olympian Database file!");
+    }
+}
+
 void MainWindow::SetupUi()
 {
+    /*
+     * General window setup
+     */
     setWindowTitle(tr("Winter Olympian Database - De Anza College, CIS 22C, Group 5"));
     setGeometry(100, 100, 800, 600);
 
     m_statusBar = new QStatusBar;
     setStatusBar(m_statusBar);
     m_statusBar->showMessage("Ready.");
+
+    m_menuBar = new QMenuBar;
+    setMenuBar(m_menuBar);
+    m_menuBar->addMenu(m_menuFile = new QMenu("&File"));
+    m_menuFile->addAction(m_actionOpen = new QAction("Open"));
+    m_menuFile->addAction(m_actionSave = new QAction("Save"));
+    m_menuFile->addAction(m_actionQuit = new QAction("Quit"));
+
+    m_actionOpen->setShortcuts(QKeySequence::Open);
+    m_actionSave->setShortcuts(QKeySequence::Save);
+    m_actionQuit->setShortcuts(QKeySequence::Quit);
+
+    connect(m_actionOpen, &QAction::triggered, this, &MainWindow::OnMenuOpen);
+    connect(m_actionSave, &QAction::triggered, this, &MainWindow::OnMenuSave);
+    connect(m_actionQuit, &QAction::triggered, this, &MainWindow::OnMenuQuit);
+
     /*
-     * Table
+     * Table of actual data
      */
     m_model = new OlympianTableModel(*m_database);
     m_tableView = new QTableView;
@@ -59,13 +99,14 @@ void MainWindow::SetupUi()
     m_tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
     m_tableView->setSizeAdjustPolicy(QAbstractItemView::SizeAdjustPolicy::AdjustToContents);
     m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
     /*
-     * Tab widget for accessing and modifying the data
+     * Tab widget for changing how we view and modify the data
      */
     m_tabWidget = new QTabWidget;
 
     /*
-     * Search and Sort
+     * Search and Sort (Display)
      */
     m_searchLine = new QLineEdit;
     m_searchBtn = new QPushButton(tr("Search"));
@@ -235,6 +276,21 @@ void MainWindow::OnUndoDeleteButtonClicked()
     {
         QMessageBox::information(this, "No delete left", "Nothing left to undo!");
     }
+}
+
+void MainWindow::OnMenuOpen()
+{
+    ReadFile(""); //read an empty file, causing the file dialog to open
+}
+
+void MainWindow::OnMenuSave()
+{
+    SaveFile("");
+}
+
+void MainWindow::OnMenuQuit()
+{
+    close();
 }
 
 void MainWindow::OnAddNewButtonClicked()
