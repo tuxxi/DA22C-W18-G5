@@ -9,12 +9,14 @@
 #include <string>
 #include "OlympicDatabase.h"
 
-#define DEFAULT_INFILE "winter-olympics.csv"
-#define DEFAULT_OUTFILE "winter-olympics-out.csv"
+#define DEFAULT_INFILE "../data/winter-olympics.csv"
+#define DEFAULT_OUTFILE "../data/winter-olympics-out.csv"
 
 using namespace std;
 
 ifstream getCmndLineInfile(int, const char *[]);
+void getOutfileName(int, const char *[], string&);
+
 int getChoice();
 void displayMenu();
 void doMainMenu(int choice, OlympicDatabase &olympianDatabase);
@@ -42,21 +44,19 @@ bool validatenMedals(string);
 int main(int argc, const char * argv[])
 {
     int choice;
-    ifstream infile;
+    string infileName, outfileName;
+    ifstream infile = getCmndLineInfile(argc, argv);
 
-    if (argc > 1)
-        infile = getCmndLineInfile(argc, argv);
-    else //default file jic
-        infile = ifstream(DEFAULT_INFILE);
-
-    if (!infile) return -1;
-
+    getOutfileName(argc, argv, outfileName);
     OlympicDatabase olympianDatabase(infile);
 
     displayMenu();
     while ((choice = getChoice()) != 8)
     {
-        doMainMenu(choice, olympianDatabase);
+        if (choice == 6)
+            olympianDatabase.saveDatabase(outfileName);
+        else
+            doMainMenu(choice, olympianDatabase);
         displayMenu();
     }
 
@@ -67,16 +67,20 @@ int main(int argc, const char * argv[])
 
 ifstream getCmndLineInfile(int argc, const char *argv[])
 {
+    string infileName = DEFAULT_INFILE;
+    ifstream infile;
 
-    if (argc <= 1) //argc includes the name of the program in the count, similar to how argv[0] is the name of the program
-    {
-        cerr << "Cannot build database. An input file was not specified. Exiting." << endl;
-        exit(-1);
-    }
+   for (int i = 0; i < argc; i++)
+       if (!strcmp("-i", argv[i]))
+            if (i + 1 < argc && (strcmp(argv[i + 1], "-o")))
+                infileName = argv[i + 1];
+            else
+            {
+                cerr << "[ERROR]: flag -i for input file was used but no input file was specified. Exiting.\n";
+                exit(1);
+            }
 
-    const string infileName = argv[1];
-
-    ifstream infile(infileName);
+    infile.open(infileName);
 
     if (!infile)
     {
@@ -85,6 +89,21 @@ ifstream getCmndLineInfile(int argc, const char *argv[])
     }
 
     return infile;
+}
+
+void getOutfileName(int argc, const char *argv[], string &outfileName)
+{
+    outfileName = DEFAULT_OUTFILE;
+
+    for (int i = 0; i < argc; i++)
+        if (!strcmp("-o", argv[i]))
+            if (i + 1 < argc && (strcmp(argv[i + 1], "-i")))
+                outfileName = argv[i + 1];
+            else
+            {
+                cerr << "[ERROR]: flag -o for output file was used but no input file was specified. Exiting.\n";
+                exit(1);
+            }
 }
 
 int getChoice()
@@ -158,14 +177,6 @@ void doMainMenu(int choice, OlympicDatabase &olympianDatabase)
             doListSubmenu(listOp, olympianDatabase);
             break;
         }
-  
-        case 6:
-        {
-            //olympianDatabase.saveDatabase();
-            break;
-        }
-
-
         case 7:
         {
             olympianDatabase.displayHashStats();
