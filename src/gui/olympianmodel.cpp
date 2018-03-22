@@ -1,8 +1,8 @@
 
 #include "olympianmodel.hpp"
 
-OlympianTableModel::OlympianTableModel(OlympianDatabase& database, QObject *parent)
-    : QAbstractTableModel(parent), OlympianDatabase(database), m_sortType(SORT_TYPE::by_name)
+OlympianTableModel::OlympianTableModel(OlympicDatabase& database, QObject *parent)
+    : QAbstractTableModel(parent), OlympicDatabase(database), m_sortType(SORT_TYPE::by_name)
 {
     //default to sorting in alphabetical order
     setSortByName();
@@ -107,7 +107,7 @@ void OlympianTableModel::setSortByAge()
     beginResetModel();
     m_currentDisplayVec.clear();
     //traverse age BST in order to reorder the data that's being displayed
-    OlympianDatabase::ageBst->insertInorder(m_currentDisplayVec);
+    OlympicDatabase::ageBst->insertInorder(m_currentDisplayVec);
     m_sortType = SORT_TYPE::by_age;
     endResetModel();
 }
@@ -117,7 +117,7 @@ void OlympianTableModel::setSortByHeight()
     beginResetModel();
     m_currentDisplayVec.clear();
     //traverse age BST in order to reorder the data that's being displayed
-    OlympianDatabase::heightBst->insertInorder(m_currentDisplayVec);
+    OlympicDatabase::heightBst->insertInorder(m_currentDisplayVec);
     m_sortType = SORT_TYPE::by_height;
     endResetModel();
 }
@@ -127,7 +127,7 @@ void OlympianTableModel::setSortByName()
     beginResetModel();
     m_currentDisplayVec.clear();
     //traverse the linked list to reorder the display data
-    OlympianDatabase::alphabeticalOrderList->insertToVector(m_currentDisplayVec);
+    OlympicDatabase::alphabeticalOrderList->insertToVector(m_currentDisplayVec);
     m_sortType = SORT_TYPE::by_name;
     endResetModel();
 }
@@ -141,7 +141,7 @@ void OlympianTableModel::resetModel(Vector<Olympian *> &vec)
 }
 Olympian* OlympianTableModel::undoDelete()
 {
-    if (OlympianDatabase::undoDelete())
+    if (OlympicDatabase::undoDelete())
     {
         std::pair<Olympian*, int> deletedItem;
         if (!m_deleteStack.pop(deletedItem)) return nullptr;

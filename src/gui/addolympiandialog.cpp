@@ -5,7 +5,7 @@
 
 #include "addolympiandialog.hpp"
 
-AddOlympianDialog::AddOlympianDialog(OlympianDatabase& database, QWidget* parent)
+AddOlympianDialog::AddOlympianDialog(OlympicDatabase& database, QWidget* parent)
     : QDialog(parent), m_database(database)
 {
     SetupUi();

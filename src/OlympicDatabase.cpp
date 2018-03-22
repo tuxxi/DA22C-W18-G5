@@ -1,4 +1,4 @@
-#include "OlympianDatabase.h"
+#include "OlympicDatabase.h"
 
 #include <fstream>
 #include <string>
@@ -11,7 +11,7 @@ static const int BUCKET_SIZE = 3;
 static const int SIZE = 512;
 
 
-OlympianDatabase::OlympianDatabase(ifstream &infile)
+OlympicDatabase::OlympicDatabase(ifstream &infile)
 {
     // create hash table based on the prime nearest to double the number of entries
     int size = Util::Primes.getNearestPrime(SIZE);
@@ -26,7 +26,7 @@ OlympianDatabase::OlympianDatabase(ifstream &infile)
     _buildDatabase(infile);
 }
 
-OlympianDatabase::~OlympianDatabase()
+OlympicDatabase::~OlympicDatabase()
 {
     delete hashTable;
     delete ageBst;
@@ -40,7 +40,7 @@ OlympianDatabase::~OlympianDatabase()
     delete allRecords;
 }
 
-bool OlympianDatabase::undoDelete()
+bool OlympicDatabase::undoDelete()
 {
     Olympian *lastDeleted;
 
@@ -61,7 +61,7 @@ bool OlympianDatabase::undoDelete()
     return false;
 
 }
-Olympian *OlympianDatabase::searchByName(string name)
+Olympian *OlympicDatabase::searchByName(string name)
 {
     Olympian o;
     auto foundRecord = &o;
@@ -73,7 +73,7 @@ Olympian *OlympianDatabase::searchByName(string name)
     return nullptr;
 }
 
-bool OlympianDatabase::searchByAge(int age, Vector<Olympian*>& vecResults)
+bool OlympicDatabase::searchByAge(int age, Vector<Olympian*>& vecResults)
 {
     Olympian oly;
     auto searchObj = &oly;
@@ -83,7 +83,7 @@ bool OlympianDatabase::searchByAge(int age, Vector<Olympian*>& vecResults)
     return !vecResults.empty();
 }
 
-bool OlympianDatabase::searchByHeight(int height, Vector<Olympian*>& vecResults)
+bool OlympicDatabase::searchByHeight(int height, Vector<Olympian*>& vecResults)
 {
     Olympian oly;
     auto searchObj = &oly;
@@ -93,31 +93,31 @@ bool OlympianDatabase::searchByHeight(int height, Vector<Olympian*>& vecResults)
     return !vecResults.empty();
 }
 
-void OlympianDatabase::displayAgeInOrder()
+void OlympicDatabase::displayAgeInOrder()
 {
     Vector<Olympian*> printVec;
     ageBst->insertInorder(printVec);
     cout << printVec;
 }
 
-void OlympianDatabase::displayHeightInOrder()
+void OlympicDatabase::displayHeightInOrder()
 {
     Vector<Olympian*> printVec;
     heightBst->insertInorder(printVec);
     cout << printVec;
 }
 
-void OlympianDatabase::displayAgeTree()
+void OlympicDatabase::displayAgeTree()
 {
     ageBst->printIndented(_printAgeIndented);
 }
 
-void OlympianDatabase::displayHeightTree()
+void OlympicDatabase::displayHeightTree()
 {
     heightBst->printIndented(_printHeightIndented);
 }
 
-void OlympianDatabase::displayHashStats()
+void OlympicDatabase::displayHashStats()
 {
     double loadFactor = hashTable->getLoadFactor();
 
@@ -128,19 +128,19 @@ void OlympianDatabase::displayHashStats()
     cout << "Current Load Factor: " << setprecision(2) << fixed << loadFactor << "%\n";
     cout << "# of Collisions: " << hashTable->getnCollisions() << endl;
 }
-void OlympianDatabase::displayAll()
+void OlympicDatabase::displayAll()
 {
     for (auto oly : *allRecords)
     {
         cout << *oly;
     }
 }
-void OlympianDatabase::displayAlphabeticalOrder()
+void OlympicDatabase::displayAlphabeticalOrder()
 {
     alphabeticalOrderList->displayList();
 }
 
-bool OlympianDatabase::saveDatabase(std::string outfileName)
+bool OlympicDatabase::saveDatabase(std::string outfileName)
 {
     ofstream outfile(outfileName);
 
@@ -157,7 +157,7 @@ bool OlympianDatabase::saveDatabase(std::string outfileName)
     return true;
 }
 
-bool OlympianDatabase::_buildDatabase(ifstream &infile)
+bool OlympicDatabase::_buildDatabase(ifstream &infile)
 {
     while (auto newRecord = _readRecord(infile))
         if (insert(newRecord))
@@ -166,7 +166,7 @@ bool OlympianDatabase::_buildDatabase(ifstream &infile)
     return true;
 }
 
-Olympian *OlympianDatabase::_readRecord(std::ifstream &infile)
+Olympian *OlympicDatabase::_readRecord(std::ifstream &infile)
 {
     /*//seek to the given line num
     infile.seekg(std::ios::beg);
@@ -208,7 +208,7 @@ Olympian *OlympianDatabase::_readRecord(std::ifstream &infile)
     return nullptr;
 }
 
-bool OlympianDatabase::insert(Olympian *newEntry)
+bool OlympicDatabase::insert(Olympian *newEntry)
 {
     //insert into hash table first.
     if (hashTable->insert(newEntry))
@@ -230,7 +230,7 @@ bool OlympianDatabase::insert(Olympian *newEntry)
     return false;
 }
 
-bool OlympianDatabase::remove(string name)
+bool OlympicDatabase::remove(string name)
 {
     Olympian o;
     auto foundRecord = &o;
@@ -257,7 +257,7 @@ bool OlympianDatabase::remove(string name)
 
     return false;
 }
-long int OlympianDatabase::_hashFunc(Olympian *const &olympian, long int size)
+long int OlympicDatabase::_hashFunc(Olympian *const &olympian, long int size)
 {
     long int sum = 0;
     string name = olympian->getName();
@@ -267,13 +267,13 @@ long int OlympianDatabase::_hashFunc(Olympian *const &olympian, long int size)
 
     return sum % size;
 }
-COMPARE_FN OlympianDatabase::_cmpName(Olympian *const &a, Olympian *const &b)
+COMPARE_FN OlympicDatabase::_cmpName(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() < b->getName()) return COMPARE_FN::LESS_THAN;
     else if (a->getName() > b->getName()) return COMPARE_FN::GREATER_THAN;
     else return COMPARE_FN::EQUAL_TO;
 }
-COMPARE_FN OlympianDatabase::_cmpAge(Olympian *const &a, Olympian *const &b)
+COMPARE_FN OlympicDatabase::_cmpAge(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_OBJECT;
 
@@ -281,7 +281,7 @@ COMPARE_FN OlympianDatabase::_cmpAge(Olympian *const &a, Olympian *const &b)
     else if (a->getAge() > b->getAge()) return COMPARE_FN::GREATER_THAN;
     else return COMPARE_FN::EQUAL_TO;
 }
-COMPARE_FN OlympianDatabase::_cmpHeight(Olympian *const &a, Olympian *const &b)
+COMPARE_FN OlympicDatabase::_cmpHeight(Olympian *const &a, Olympian *const &b)
 {
     if (a->getName() == b->getName()) return COMPARE_FN::EQUAL_OBJECT;
 
@@ -290,14 +290,14 @@ COMPARE_FN OlympianDatabase::_cmpHeight(Olympian *const &a, Olympian *const &b)
     else return COMPARE_FN::EQUAL_TO;
 }
 
-void OlympianDatabase::_printRecord(Olympian *const &olympian, std::ostream &os)
+void OlympicDatabase::_printRecord(Olympian *const &olympian, std::ostream &os)
 {
     os << olympian->getName() << "," << olympian->getSport() << "," << olympian->getState()
        << "," << olympian->getAge() << "," << olympian->getHeight() << "," << olympian->getGender()
        << "," << olympian->getnGold() << "," << olympian->getnSilver() << "," << olympian->getnBronze() << endl;
 }
 
-void OlympianDatabase::_printAgeIndented(Olympian *const &object, const int level)
+void OlympicDatabase::_printAgeIndented(Olympian *const &object, const int level)
 {
     for(int i=0; i<(level + 1) * 5 + 1; i++)
         std::cout<<" ";
@@ -305,7 +305,7 @@ void OlympianDatabase::_printAgeIndented(Olympian *const &object, const int leve
     std::cout<<object->getName()<<" "<<object->getAge()<<std::endl;
 }
 
-void OlympianDatabase::_printHeightIndented(Olympian *const &object, const int level)
+void OlympicDatabase::_printHeightIndented(Olympian *const &object, const int level)
 {
     for(int i=0; i<(level + 1) * 5 + 1; i++)
         std::cout<<" ";

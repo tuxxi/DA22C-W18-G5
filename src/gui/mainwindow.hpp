@@ -8,7 +8,7 @@
 
 #include <memory>
 
-#include "../OlympianDatabase.h"
+#include "../OlympicDatabase.h"
 #include "olympianmodel.hpp"
 
 class MainWindow : public QMainWindow
@@ -43,6 +43,6 @@ private:
     OlympianTableModel* m_model;
     QStatusBar* m_statusBar;
     QTableView* m_tableView;
-    std::unique_ptr<OlympianDatabase> m_database;
+    std::unique_ptr<OlympicDatabase> m_database;
 
 };

@@ -1,12 +1,12 @@
 #pragma once
 #include <QAbstractTableModel> 
-#include "../OlympianDatabase.h"
+#include "../OlympicDatabase.h"
 
-class OlympianTableModel : public QAbstractTableModel, private OlympianDatabase
+class OlympianTableModel : public QAbstractTableModel, private OlympicDatabase
 {
     Q_OBJECT
 public:
-    OlympianTableModel(OlympianDatabase& database, QObject *parent = nullptr);
+    OlympianTableModel(OlympicDatabase& database, QObject *parent = nullptr);
     int rowCount(const QModelIndex& parent) const override;
     int columnCount(const QModelIndex &parent) const override;
 

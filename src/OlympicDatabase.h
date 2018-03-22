@@ -12,7 +12,8 @@
 #include "HashTable.h"
 #include "Util.h"
 
-class OlympianDatabase {
+class OlympicDatabase
+{
 
 protected:
     int nRecords;
@@ -41,8 +42,8 @@ protected:
     static void _printHeightIndented(Olympian *const &, const int);
 
 public:
-    explicit OlympianDatabase(std::ifstream&);
-    ~OlympianDatabase();
+    explicit OlympicDatabase(std::ifstream&);
+    ~OlympicDatabase();
 
     int getnRecords() const { return nRecords; }
 

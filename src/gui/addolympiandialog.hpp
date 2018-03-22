@@ -3,18 +3,18 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QSpinBox>
-#include "../OlympianDatabase.h"
+#include "../OlympicDatabase.h"
 
 class AddOlympianDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit AddOlympianDialog(OlympianDatabase& database, QWidget* parent = nullptr);
+    explicit AddOlympianDialog(OlympicDatabase& database, QWidget* parent = nullptr);
     void OnOkButtonClicked();
     void OnCancelButtonClicked();
 private:
     Olympian* CreateOlympian() const;
-    OlympianDatabase& m_database;
+    OlympicDatabase& m_database;
 
     QPushButton* m_OKBtn, *m_cancelBtn;
     QLineEdit* m_nameLine, *m_stateLine, *m_sportLine;

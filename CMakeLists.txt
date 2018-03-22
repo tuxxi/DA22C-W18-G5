@@ -23,7 +23,7 @@ set(PROJECT_SRCS
         src/Vector.h
 
         src/Olympian.h
-        src/OlympianDatabase.h src/OlympianDatabase.cpp
+        src/OlympicDatabase.h src/OlympicDatabase.cpp
         src/tests/BSTTest.h src/tests/VectorTest.h src/tests/HashTableTest.h
         src/tests/Tests.cpp
         src/Util.h src/Util.cpp

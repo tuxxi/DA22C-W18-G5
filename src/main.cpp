@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "OlympianDatabase.h"
+#include "OlympicDatabase.h"
 
 #define DEFAULT_INFILE "winter-olympics.csv"
 #define DEFAULT_OUTFILE "winter-olympics-out.csv"
@@ -17,13 +17,13 @@ using namespace std;
 ifstream getCmndLineInfile(int, const char *[]);
 int getChoice();
 void displayMenu();
-void doMainMenu(int choice, OlympianDatabase &olympianDatabase);
+void doMainMenu(int choice, OlympicDatabase &olympianDatabase);
 
 void searchSubMenu();
-void doSearchSubmenu(int choice, OlympianDatabase &database);
+void doSearchSubmenu(int choice, OlympicDatabase &database);
 
 void listSubMenu();
-void doListSubmenu(int choice, OlympianDatabase &database);
+void doListSubmenu(int choice, OlympicDatabase &database);
 
 void printVector(Vector<Olympian*> &vector);
 
@@ -51,7 +51,7 @@ int main(int argc, const char * argv[])
 
     if (!infile) return -1;
 
-    OlympianDatabase olympianDatabase(infile);
+    OlympicDatabase olympianDatabase(infile);
 
     displayMenu();
     while ((choice = getChoice()) != 8)
@@ -107,7 +107,7 @@ int getChoice()
 }
 
 
-void doMainMenu(int choice, OlympianDatabase &olympianDatabase)
+void doMainMenu(int choice, OlympicDatabase &olympianDatabase)
 {
     switch (choice)
     {
@@ -212,7 +212,7 @@ void printVector(Vector<Olympian *> &vector)
         if (oly) cout << *oly << endl;
     }
 }
-void doSearchSubmenu(int choice, OlympianDatabase &database)
+void doSearchSubmenu(int choice, OlympicDatabase &database)
 {
     string key;
     switch (choice)
@@ -268,7 +268,7 @@ void doSearchSubmenu(int choice, OlympianDatabase &database)
         std::cout << "\nYou did not enter a valid option. Please enter a number between 1 and 3.\n\n";
     }
 }
-void doListSubmenu(int choice, OlympianDatabase &database)
+void doListSubmenu(int choice, OlympicDatabase &database)
 {
     switch (choice)
     {

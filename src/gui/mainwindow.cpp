@@ -37,7 +37,7 @@ void MainWindow::ReadFile()
     //if we still didn't open a file, just exit
     if (!file) exit(-1);
 
-    m_database = std::make_unique<OlympianDatabase>(file);
+    m_database = std::make_unique<OlympicDatabase>(file);
 }
 
 void MainWindow::SetupUi()
