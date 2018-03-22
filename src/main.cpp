@@ -38,8 +38,6 @@ bool validateAge(string);
 bool validateHeight(string);
 bool validatenMedals(string);
 
-// ofstream getOutfile(string infileName);
-
 
 int main(int argc, const char * argv[])
 {

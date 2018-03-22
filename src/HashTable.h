@@ -223,12 +223,12 @@ bool HashTable<T>::_remove(const T &removalKey)
                 table[hashVal][i] = T();
                 isFilled[hashVal][i] = false;
                 nFilled[hashVal]--;
-                tableSpacesFilled--;
 
                 if (!nFilled[hashVal])
                 {
                     delete table[hashVal];
                     table[hashVal] = nullptr;
+                    tableSpacesFilled--;
                 }
 
                 return true;
