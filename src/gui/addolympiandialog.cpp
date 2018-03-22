@@ -2,6 +2,7 @@
 #include <QComboBox>
 
 #include <QPushButton>
+#include <QtWidgets/QMessageBox>
 
 #include "addolympiandialog.hpp"
 
@@ -15,8 +16,11 @@ AddOlympianDialog::AddOlympianDialog(OlympicDatabase& database, QWidget* parent)
 
 void AddOlympianDialog::OnOkButtonClicked()
 {
-    m_database.insert(CreateOlympian());
-    close();
+    if (!m_database.insert(CreateOlympian()))
+    {
+        QMessageBox::warning(this, "Could not insert!", "Cannot insert olympian, \nit is likely a duplicate");
+    }
+    else close();
 }
 
 void AddOlympianDialog::OnCancelButtonClicked()

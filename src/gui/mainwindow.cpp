@@ -67,7 +67,7 @@ void MainWindow::SetupUi()
      * General window setup
      */
     setWindowTitle(tr("Winter Olympian Database - De Anza College, CIS 22C, Group 5"));
-    setGeometry(100, 100, 1120, 800);
+    setGeometry(100, 100, 800, 600);
 
     m_statusBar = new QStatusBar;
     setStatusBar(m_statusBar);
@@ -191,12 +191,15 @@ void MainWindow::SetupUi()
     const double nFilled = m_database->GetHashTable()->getnFilled();
     const double nCollisions = m_database->GetHashTable()->getnCollisions();
     const int nResizes = m_database->GetHashTable()->getnResizes();
+    const size_t overflowSize = m_database->GetHashTable()->getSizeOfOverflow();
 
     auto statsLayout = new QFormLayout;
     statsLayout->addRow("Load Factor (%): ", new QLabel(QString::number(loadFactor)));
     statsLayout->addRow("Table Size: ", new QLabel(QString::number(tableSize)));
     statsLayout->addRow("# of filled buckets: ", new QLabel(QString::number(nFilled)));
     statsLayout->addRow("# of collisions: ", new QLabel(QString::number(nCollisions)));
+    statsLayout->addRow("Size of overflow area: ", new QLabel(QString::number(overflowSize)));
+
     statsLayout->addRow("# of resize operations: ", new QLabel(QString::number(nResizes)));
 
     statsLayout->addItem(new QSpacerItem(0, 100)); //add spacing row

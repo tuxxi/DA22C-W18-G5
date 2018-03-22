@@ -51,7 +51,7 @@ public:
     int getnCollisions() { return nCollisions; }
     double getLoadFactor() { return static_cast<double>(tableSpacesFilled) / tableSize; }
     int getnResizes() { return nResizes; }
-
+    size_t getSizeOfOverflow() const { return overflowArea->size(); }
     bool insert(const T&);
     bool remove(const T&);
     bool search(T&);

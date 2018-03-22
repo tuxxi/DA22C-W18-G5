@@ -13,7 +13,7 @@
 using namespace std;
 
 static const int BUCKET_SIZE = 3;
-static const int SIZE = 100;
+static const int SIZE = 127;
 
 /******************************************************
    Accepts an already open input file stream and builds
